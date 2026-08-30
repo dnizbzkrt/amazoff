@@ -86,12 +86,36 @@ home.html            → Mağaza (ürün listeleme, kategori filtresi)
 product.html          → Ürün detayı (?id=1)
 cart.html            → Sepet + satın alma
 success.html          → Başarılı sipariş ekranı
+orders.html           → Siparişlerim (kendi sipariş geçmişiniz)
+feed.html            → Tüm Siparişler (herkesin siparişleri, isim/anonim tercihli)
+settings.html         → Görünen ad + "adım herkese görünsün" ayarı
 style.css            → Tüm site stilleri
 supabase-config.js    → Supabase bağlantısı + oturum yardımcı fonksiyonları
 products.js           → 5 demo ürün (stok fotoğraflarla)
 cart.js              → Sepet mantığı (localStorage)
 supabase-setup.sql    → Veritabanı şeması (SQL Editor'a yapıştırılacak)
 ```
+
+## Siparişlerim / Tüm Siparişler nasıl çalışır?
+
+- **Siparişlerim** (`orders.html`): sadece kendi siparişlerinizi, Supabase'deki
+  RLS (Row Level Security) kuralları sayesinde otomatik olarak görürsünüz.
+- **Tüm Siparişler** (`feed.html`): herkesin siparişlerini gösteren ortak bir
+  akış. Burada kimin ne aldığı görünür ama **isim gizliliği kullanıcı
+  tercihine bağlıdır**:
+  - `settings.html` sayfasından bir "Görünen Ad" girip "Siparişlerimde adım
+    görünsün" anahtarını açarsanız, adınız akışta görünür.
+  - Anahtar kapalıysa (varsayılan), siparişleriniz akışta **"Anonim
+    Kullanıcı"** olarak görünür — kimliğiniz gizli kalır.
+  - Bu mantık veritabanı tarafında bir Postgres fonksiyonu
+    (`get_order_feed`) ile çalışır; wallet bakiyesi, e-posta gibi hassas
+    bilgiler bu akışta **hiçbir zaman** paylaşılmaz, sadece sipariş no,
+    tutar, tarih ve (varsa) görünen ad döner.
+
+> Önemli: Bu özelliğin çalışması için `supabase-setup.sql` dosyasının
+> içindeki **"UPDATE"** başlıklı son bölümü de SQL Editor'da çalıştırmanız
+> gerekir (daha önce ilk kurulumu yaptıysanız sadece bu son bölümü
+> çalıştırmanız yeterli).
 
 ## Demo ürünler
 
@@ -102,7 +126,6 @@ alanlarını kendi görsellerinizle değiştirebilirsiniz (örneğin bu klasöre
 
 ## Sonraki adımlar
 
-- Sipariş geçmişi sayfası (`orders` / `order_items` tabloları zaten hazır)
 - Cüzdana demo para yükleme
 - Admin paneli (ürün ekleme/çıkarma, stok yönetimi)
 - Arama ve filtreleme

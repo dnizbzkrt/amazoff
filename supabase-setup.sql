@@ -89,3 +89,69 @@ create policy "Kullanıcı kendi sipariş kalemini ekleyebilir"
 -- statically in lib/products.ts (matching the doc's "Phase 3 - start with
 -- JSON" recommendation). If you later want to move products into Supabase
 -- too, you can add a separate "products" table.
+
+-- =========================================================================
+-- UPDATE — "My Orders" + public "All Orders" feed with name privacy toggle
+-- If you already ran the script above in an earlier setup, you only need
+-- to run the block below (it's safe to run on its own).
+-- =========================================================================
+
+-- Each user can set a display name and choose whether it's shown publicly.
+-- If is_public is false (the default), the feed shows "Anonim Kullanıcı"
+-- instead of their name.
+alter table public.profiles
+  add column if not exists display_name text,
+  add column if not exists is_public boolean not null default false;
+
+-- Public order feed: returns every order with either the buyer's display
+-- name (if they opted in) or "Anonim Kullanıcı". This function is
+-- SECURITY DEFINER so it can read across all users' orders/profiles
+-- without loosening the table-level RLS policies above — it only ever
+-- returns the safe, already-privacy-filtered columns below (never wallet
+-- balance, email, or user id).
+create or replace function public.get_order_feed()
+returns table (
+  order_id uuid,
+  order_number text,
+  total_amount numeric,
+  created_at timestamptz,
+  buyer_name text
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select
+    o.id,
+    o.order_number,
+    o.total_amount,
+    o.created_at,
+    case
+      when p.is_public and coalesce(p.display_name, '') <> '' then p.display_name
+      else 'Anonim Kullanıcı'
+    end as buyer_name
+  from public.orders o
+  join public.profiles p on p.id = o.user_id
+  order by o.created_at desc;
+$$;
+
+grant execute on function public.get_order_feed() to authenticated;
+
+-- Returns the line items for a single order (used by both "My Orders" and
+-- the public feed detail view). Also SECURITY DEFINER for the same reason.
+create or replace function public.get_order_feed_items(p_order_id uuid)
+returns table (
+  product_name text,
+  quantity integer,
+  price numeric
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select product_name, quantity, price
+  from public.order_items
+  where order_id = p_order_id;
+$$;
+
+grant execute on function public.get_order_feed_items(uuid) to authenticated;

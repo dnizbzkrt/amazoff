@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>amazoff - Ayarlar</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="home.html" class="logo-block">
+      <span class="logo">amazoff</span>
+      <span class="logo-slogan">everything you don't actually need</span>
+    </a>
+    <nav class="categories">
+      <a href="home.html">Ürünler</a>
+      <a href="home.html?category=Kozmetik">Kozmetik</a>
+      <a href="home.html?category=Kadın+Giyim">Kadın Giyim</a>
+      <a href="orders.html">Siparişlerim</a>
+      <a href="feed.html">Tüm Siparişler</a>
+    </nav>
+    <div class="header-actions">
+      <span class="wallet-pill" id="walletDisplay">Cüzdan: -</span>
+      <a href="settings.html" class="icon-btn icon-btn-ghost">Ayarlar</a>
+      <a href="cart.html" class="icon-btn">
+        Sepet
+        <span class="cart-badge" id="cartBadge">0</span>
+      </a>
+      <a href="#" class="logout-link" onclick="logout(); return false;">Çıkış</a>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <h1 class="section-title">Ayarlar</h1>
+  <p class="page-subtitle" style="margin-bottom:22px;">
+    "Tüm Siparişler" sayfasında siparişleriniz herkese görünür. Burada
+    isminizin diğer kullanıcılara nasıl görüneceğini seçebilirsiniz.
+  </p>
+
+  <div class="settings-card">
+    <div id="msgBox"></div>
+
+    <div class="form-row">
+      <label>Görünen Ad</label>
+      <input type="text" id="displayName" placeholder="Örn. Ayşe K." maxlength="40">
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Siparişlerimde adım görünsün</div>
+        <div class="toggle-desc">Kapalıyken "Tüm Siparişler" sayfasında adınız yerine "Anonim Kullanıcı" yazar.</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="isPublicToggle">
+        <span class="switch-track"></span>
+      </label>
+    </div>
+
+    <button class="btn-full" id="saveBtn" style="margin-top:20px;">Kaydet</button>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="foot-slogan">everything you don't actually need.</div>
+  amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="products.js"></script>
+<script src="cart.js"></script>
+<script>
+  let currentUser = null;
+
+  (async () => {
+    currentUser = await requireAuth();
+    if (!currentUser) return;
+
+    renderWalletBalance(currentUser.id);
+    updateCartBadge();
+
+    const { data, error } = await supabaseClient
+      .from("profiles")
+      .select("display_name, is_public")
+      .eq("id", currentUser.id)
+      .single();
+
+    if (!error && data) {
+      document.getElementById("displayName").value = data.display_name || "";
+      document.getElementById("isPublicToggle").checked = !!data.is_public;
+    }
+  })();
+
+  document.getElementById("saveBtn").addEventListener("click", async () => {
+    const msgBox = document.getElementById("msgBox");
+    msgBox.innerHTML = "";
+
+    const displayName = document.getElementById("displayName").value.trim();
+    const isPublic = document.getElementById("isPublicToggle").checked;
+
+    if (isPublic && !displayName) {
+      msgBox.innerHTML = `<div class="msg error">Adınız görünsün istiyorsanız önce bir görünen ad girin.</div>`;
+      return;
+    }
+
+    const { error } = await supabaseClient
+      .from("profiles")
+      .update({ display_name: displayName, is_public: isPublic })
+      .eq("id", currentUser.id);
+
+    if (error) {
+      msgBox.innerHTML = `<div class="msg error">Kaydedilemedi: ${error.message}</div>`;
+    } else {
+      msgBox.innerHTML = `<div class="msg success">Ayarlarınız kaydedildi.</div>`;
+    }
+  });
+</script>
+
+</body>
+</html>

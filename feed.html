@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>amazoff - Tüm Siparişler</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="home.html" class="logo-block">
+      <span class="logo">amazoff</span>
+      <span class="logo-slogan">everything you don't actually need</span>
+    </a>
+    <nav class="categories">
+      <a href="home.html">Ürünler</a>
+      <a href="home.html?category=Kozmetik">Kozmetik</a>
+      <a href="home.html?category=Kadın+Giyim">Kadın Giyim</a>
+      <a href="orders.html">Siparişlerim</a>
+      <a href="feed.html">Tüm Siparişler</a>
+    </nav>
+    <div class="header-actions">
+      <span class="wallet-pill" id="walletDisplay">Cüzdan: -</span>
+      <a href="settings.html" class="icon-btn icon-btn-ghost">Ayarlar</a>
+      <a href="cart.html" class="icon-btn">
+        Sepet
+        <span class="cart-badge" id="cartBadge">0</span>
+      </a>
+      <a href="#" class="logout-link" onclick="logout(); return false;">Çıkış</a>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <div class="page-header">
+    <div>
+      <h1 class="section-title">Tüm Siparişler</h1>
+      <p class="page-subtitle">
+        amazoff kullanıcılarının verdiği tüm siparişler. Kullanıcılar
+        isimlerini <a href="settings.html" style="color:var(--brand);font-weight:700;">Ayarlar</a>
+        sayfasından açık veya anonim gösterebilir.
+      </p>
+    </div>
+  </div>
+
+  <div id="feedList">
+    <p class="page-subtitle">Yükleniyor...</p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="foot-slogan">everything you don't actually need.</div>
+  amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="products.js"></script>
+<script src="cart.js"></script>
+<script>
+  function formatDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString("tr-TR", { day: "2-digit", month: "long", year: "numeric" });
+  }
+
+  async function loadOrderItems(orderId) {
+    const { data, error } = await supabaseClient.rpc("get_order_feed_items", { p_order_id: orderId });
+    if (error) {
+      console.error(error);
+      return [];
+    }
+    return data || [];
+  }
+
+  const loadedFeedItems = {};
+
+  async function expandFeedOrder(idx, orderId) {
+    const card = document.getElementById(`feed-order-${idx}`);
+    card.classList.toggle("open");
+    if (loadedFeedItems[idx]) return;
+
+    const items = await loadOrderItems(orderId);
+    const container = document.getElementById(`feed-items-${idx}`);
+    container.innerHTML = items.map((it) => `
+      <div class="order-item-row">
+        <span class="item-name">${it.product_name}<span class="item-qty">x${it.quantity}</span></span>
+        <span class="item-price">${formatTL(it.price * it.quantity)}</span>
+      </div>
+    `).join("") || `<p class="page-subtitle">Ürün bulunamadı.</p>`;
+    loadedFeedItems[idx] = true;
+  }
+
+  (async () => {
+    const user = await requireAuth();
+    if (!user) return;
+
+    renderWalletBalance(user.id);
+    updateCartBadge();
+
+    const { data: feed, error } = await supabaseClient.rpc("get_order_feed");
+    const list = document.getElementById("feedList");
+
+    if (error) {
+      list.innerHTML = `<div class="msg error">Sipariş akışı yüklenemedi: ${error.message}<br><br>
+        Bu özelliğin çalışması için <code>supabase-setup.sql</code> dosyasındaki
+        "UPDATE" bölümünü Supabase SQL Editor'da çalıştırmanız gerekir.</div>`;
+      return;
+    }
+
+    if (!feed || feed.length === 0) {
+      list.innerHTML = `<div class="empty-state"><p>Henüz hiç sipariş verilmemiş.</p></div>`;
+      return;
+    }
+
+    list.innerHTML = feed.map((o, idx) => `
+      <div class="order-card" id="feed-order-${idx}">
+        <div class="order-card-top" onclick="expandFeedOrder(${idx}, '${o.order_id}')">
+          <div class="order-card-main">
+            <div class="order-number">${o.order_number}</div>
+            <div class="order-meta">
+              ${formatDate(o.created_at)} ·
+              <span class="buyer-tag ${o.buyer_name === 'Anonim Kullanıcı' ? 'anon' : ''}">${o.buyer_name}</span>
+            </div>
+          </div>
+          <div class="order-card-right">
+            <span class="order-total">${formatTL(o.total_amount)}</span>
+            <span class="chevron">▼</span>
+          </div>
+        </div>
+        <div class="order-items-list" id="feed-items-${idx}">
+          <p class="page-subtitle">Yükleniyor...</p>
+        </div>
+      </div>
+    `).join("");
+  })();
+</script>
+
+</body>
+</html>

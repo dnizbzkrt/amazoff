@@ -1,5 +1,7 @@
 # amazoff
 
+*everything you don't actually need.*
+
 Kozmetik ve Kadın Giyim kategorilerinde 5 ürünlük mini e-ticaret MVP'si.
 Gerçek ödeme yoktur — kullanıcı kayıt olduğunda **1.000 TL** demo cüzdan
 bakiyesi alır ve alışverişini bu bakiye ile simüle eder.
@@ -21,3 +23,8 @@ dosyasına bakın.
 
 Site açıldığında: Kayıt Ol → 1.000 TL bakiye → ürünleri gez → sepete ekle →
 Satın Al → sipariş Supabase'e kaydedilir, bakiye güncellenir.
+
+**Siparişlerim** sayfasından kendi geçmişinizi, **Tüm Siparişler**
+sayfasından ise herkesin siparişlerini görebilirsiniz — isminizin bu akışta
+görünüp görünmeyeceğini **Ayarlar** sayfasından siz belirlersiniz (varsayılan:
+anonim).

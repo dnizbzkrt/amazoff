@@ -10,14 +10,20 @@
 
 <header class="site-header">
   <div class="container header-inner">
-    <a href="home.html" class="logo">amazoff</a>
+    <a href="home.html" class="logo-block">
+      <span class="logo">amazoff</span>
+      <span class="logo-slogan">everything you don't actually need</span>
+    </a>
     <nav class="categories">
       <a href="home.html">Ürünler</a>
       <a href="home.html?category=Kozmetik">Kozmetik</a>
       <a href="home.html?category=Kadın+Giyim">Kadın Giyim</a>
+      <a href="orders.html">Siparişlerim</a>
+      <a href="feed.html">Tüm Siparişler</a>
     </nav>
     <div class="header-actions">
       <span class="wallet-pill" id="walletDisplay">Cüzdan: -</span>
+      <a href="settings.html" class="icon-btn icon-btn-ghost">Ayarlar</a>
       <a href="cart.html" class="icon-btn">
         Sepet
         <span class="cart-badge" id="cartBadge">0</span>
@@ -31,7 +37,10 @@
   <!-- filled by JS -->
 </main>
 
-<footer class="site-footer">amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.</footer>
+<footer class="site-footer">
+  <div class="foot-slogan">everything you don't actually need.</div>
+  amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
