@@ -15,10 +15,10 @@ dosyasına bakın.
 
 ## Hızlı özet
 
-1. `supabase-setup.sql` dosyasını Supabase SQL Editor'da çalıştırın.
-2. Supabase URL ve anon key'inizi `supabase-config.js` içine yapıştırın.
-3. Bu klasörü GitHub reponuza push edin.
-4. Repo **Settings > Pages** kısmından `main` branch / root klasörü seçip
+1. Supabase Dashboard → SQL Editor'da `supabase-setup.sql` dosyasının tüm
+   içeriğini çalıştırın (key'ler `supabase-config.js`'e zaten gömülü).
+2. Bu klasörü GitHub reponuza push edin.
+3. Repo **Settings > Pages** kısmından `main` branch / root klasörü seçip
    yayınlayın.
 
 Site açıldığında: Kayıt Ol → 1.000 TL bakiye → ürünleri gez → sepete ekle →

@@ -5,40 +5,36 @@ Bu proje düz HTML/CSS/JS ile yazılmıştır (framework yok, build adımı yok)
 
 ---
 
-## 1) Ücretsiz Supabase veritabanı kurulumu
+## 1) Supabase veritabanı — key'ler zaten gömülü ✅
 
-1. https://supabase.com → **Start your project** → GitHub hesabınızla ücretsiz kayıt olun.
-2. **New Project**:
-   - Project name: `amazoff`
-   - Database password: güçlü bir şifre belirleyin (bir yere not edin)
-   - Region: `Frankfurt (eu-central-1)`
-3. Proje açılınca sol menüden **SQL Editor** → **New query** → bu depodaki
-   `supabase-setup.sql` dosyasının tüm içeriğini yapıştırıp **Run** deyin.
-   Bu işlem şunları oluşturur:
-   - `profiles` tablosu (cüzdan bakiyesi burada tutulur)
-   - `orders` ve `order_items` tabloları
-   - Yeni kullanıcı kayıt olduğunda otomatik olarak **1.000 TL** bakiye
-     tanımlayan tetikleyici (trigger)
-   - Row Level Security (RLS) politikaları
-4. Sol menüden **Project Settings > API** sayfasına gidin, şu iki değeri
-   kopyalayın:
-   - **Project URL**
-   - **anon public** key
-5. **Authentication > Providers** sayfasında **Email** sağlayıcısının açık
-   olduğundan emin olun (varsayılan olarak açıktır). Test sırasında
-   e-posta doğrulamasını atlamak isterseniz **Authentication > Settings**
-   içinde "Confirm email" seçeneğini kapatabilirsiniz.
-6. Bu iki değeri `supabase-config.js` dosyasının en üstüne yapıştırın:
+`supabase-config.js` dosyasında Supabase proje bilgileriniz zaten
+tanımlı, ekstra bir şey yapmanıza gerek yok.
 
-```js
-const SUPABASE_URL = "https://xxxxxxxxxxxx.supabase.co";
-const SUPABASE_ANON_KEY = "eyJxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-```
+**Ama tek bir zorunlu adım var:** Supabase projenizde tablolar henüz
+oluşturulmadıysa (ör. "Could not find the table 'public.orders'" gibi
+bir hata görüyorsanız) şeması hiç çalıştırılmamış demektir. Şunu yapın:
 
-> Not: Bu anahtar "anon public" anahtardır, gizli değildir — tarayıcı
-> tarafında kullanılmak üzere tasarlanmıştır. Güvenlik, veritabanı
-> tarafındaki RLS politikaları ile sağlanır (yukarıdaki SQL dosyasında
-> zaten tanımlı).
+1. https://supabase.com/dashboard → projeniz (`lwynkkwvifxqibwbxrln`) → sol
+   menüden **SQL Editor**
+2. **New query** → bu depodaki `supabase-setup.sql` dosyasının **tüm
+   içeriğini** (en baştan en sona, "UPDATE" bölümü dahil) kopyalayıp
+   yapıştırın
+3. **Run** butonuna basın
+
+Bu tek çalıştırma şunların hepsini oluşturur: `profiles`, `orders`,
+`order_items` tabloları, RLS güvenlik kuralları, yeni kullanıcıya otomatik
+1.000 TL veren tetikleyici, ve "Tüm Siparişler" sayfasının kullandığı
+`get_order_feed` / `get_order_feed_items` fonksiyonları.
+
+> Not: Daha önce sadece "UPDATE" bölümünü çalıştırıp asıl tabloları hiç
+> oluşturmadıysanız (bu, "table not found" hatalarının sebebi), dosyanın
+> tamamını baştan sona bir kere daha çalıştırmanız yeterli — `create table
+> if not exists` kullanıldığı için zaten var olan hiçbir şeyi bozmaz.
+
+**Authentication > Providers** sayfasında **Email** sağlayıcısının açık
+olduğundan emin olun (varsayılan olarak açıktır). Test sırasında
+e-posta doğrulamasını atlamak isterseniz **Authentication > Settings**
+içinde "Confirm email" seçeneğini kapatabilirsiniz.
 
 ---
 
