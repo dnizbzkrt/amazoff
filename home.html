@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>amazoff - Kozmetik &amp; Kadın Giyim</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="home.html" class="logo">amazoff</a>
+    <nav class="categories">
+      <a href="home.html">Ürünler</a>
+      <a href="home.html?category=Kozmetik">Kozmetik</a>
+      <a href="home.html?category=Kadın+Giyim">Kadın Giyim</a>
+    </nav>
+    <div class="header-actions">
+      <span class="wallet-pill" id="walletDisplay">Cüzdan: -</span>
+      <a href="cart.html" class="icon-btn">
+        Sepet
+        <span class="cart-badge" id="cartBadge">0</span>
+      </a>
+      <a href="#" class="logout-link" onclick="logout(); return false;">Çıkış</a>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <section class="hero" id="heroSection">
+    <h1>amazoff</h1>
+    <p>Kozmetik ve kadın giyim ürünlerini keşfedin. 1.000 TL demo cüzdanınızla hemen deneme alışverişi yapın — gerçek ödeme alınmaz.</p>
+  </section>
+
+  <section class="category-tiles">
+    <a class="category-tile" href="home.html?category=Kozmetik">Kozmetik</a>
+    <a class="category-tile" href="home.html?category=Kadın+Giyim">Kadın Giyim</a>
+  </section>
+
+  <section>
+    <h2 class="section-title" id="sectionTitle">Tüm Ürünler</h2>
+    <div class="product-grid" id="productGrid"></div>
+  </section>
+</main>
+
+<footer class="site-footer">amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="products.js"></script>
+<script src="cart.js"></script>
+<script>
+  (async () => {
+    const user = await requireAuth();
+    if (!user) return;
+
+    renderWalletBalance(user.id);
+    updateCartBadge();
+
+    const params = new URLSearchParams(window.location.search);
+    const category = params.get("category");
+    const list = category ? PRODUCTS.filter((p) => p.category === category) : PRODUCTS;
+
+    document.getElementById("sectionTitle").textContent = category || "Tüm Ürünler";
+    if (category) document.getElementById("heroSection").style.display = "none";
+
+    const grid = document.getElementById("productGrid");
+    grid.innerHTML = list.map((p) => `
+      <div class="product-card">
+        <a href="product.html?id=${p.id}">
+          <div class="product-img-wrap">
+            <img src="${p.image}" alt="${p.name}">
+            <span class="category-badge">${p.category}</span>
+          </div>
+        </a>
+        <div class="product-info">
+          <a href="product.html?id=${p.id}"><p class="product-name">${p.name}</p></a>
+          <p class="product-price">${formatTL(p.price)}</p>
+          <div class="product-actions">
+            <a href="product.html?id=${p.id}" class="btn-outline">Ürünü İncele</a>
+            <button class="btn-dark" onclick="addToCart(${p.id}); this.textContent='Eklendi ✓';">Sepete Ekle</button>
+          </div>
+        </div>
+      </div>
+    `).join("");
+  })();
+</script>
+
+</body>
+</html>

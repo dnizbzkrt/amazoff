@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>amazoff - Sipariş Başarılı</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="home.html" class="logo">amazoff</a>
+    <nav class="categories">
+      <a href="home.html">Ürünler</a>
+      <a href="home.html?category=Kozmetik">Kozmetik</a>
+      <a href="home.html?category=Kadın+Giyim">Kadın Giyim</a>
+    </nav>
+    <div class="header-actions">
+      <span class="wallet-pill" id="walletDisplay">Cüzdan: -</span>
+      <a href="cart.html" class="icon-btn">
+        Sepet
+        <span class="cart-badge" id="cartBadge">0</span>
+      </a>
+      <a href="#" class="logout-link" onclick="logout(); return false;">Çıkış</a>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <div class="success-card">
+    <div class="success-icon">✓</div>
+    <h1>Siparişiniz başarıyla oluşturuldu!</h1>
+    <p class="order-no" id="orderNo">Sipariş No: -</p>
+
+    <div class="success-box">
+      <div class="summary-row">
+        <span class="label">Sepet Toplamı</span>
+        <span class="value" id="orderTotal">-</span>
+      </div>
+      <div class="summary-row">
+        <span class="label">Kalan Cüzdan Bakiyesi</span>
+        <span class="value" id="orderBalance">-</span>
+      </div>
+    </div>
+
+    <a href="home.html" class="icon-btn" style="display:inline-block;">Alışverişe Devam Et</a>
+  </div>
+</main>
+
+<footer class="site-footer">amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="products.js"></script>
+<script src="cart.js"></script>
+<script>
+  (async () => {
+    const user = await requireAuth();
+    if (!user) return;
+
+    renderWalletBalance(user.id);
+    updateCartBadge();
+
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById("orderNo").textContent = `Sipariş No: ${params.get("order") || "-"}`;
+    document.getElementById("orderTotal").textContent = formatTL(params.get("total") || 0);
+    document.getElementById("orderBalance").textContent = formatTL(params.get("balance") || 0);
+  })();
+</script>
+
+</body>
+</html>

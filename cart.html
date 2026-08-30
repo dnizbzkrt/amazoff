@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>amazoff - Sepetim</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="home.html" class="logo">amazoff</a>
+    <nav class="categories">
+      <a href="home.html">Ürünler</a>
+      <a href="home.html?category=Kozmetik">Kozmetik</a>
+      <a href="home.html?category=Kadın+Giyim">Kadın Giyim</a>
+    </nav>
+    <div class="header-actions">
+      <span class="wallet-pill" id="walletDisplay">Cüzdan: -</span>
+      <a href="cart.html" class="icon-btn">
+        Sepet
+        <span class="cart-badge" id="cartBadge">0</span>
+      </a>
+      <a href="#" class="logout-link" onclick="logout(); return false;">Çıkış</a>
+    </div>
+  </div>
+</header>
+
+<main class="container" id="cartContainer">
+  <!-- filled by JS -->
+</main>
+
+<footer class="site-footer">amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="products.js"></script>
+<script src="cart.js"></script>
+<script>
+  let currentUser = null;
+  let currentWallet = 0;
+
+  function renderCart() {
+    const cart = getCart();
+    const container = document.getElementById("cartContainer");
+
+    if (cart.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <p>Sepetiniz boş.</p>
+          <a href="home.html" class="icon-btn" style="display:inline-block;margin-top:12px;">Alışverişe Başla</a>
+        </div>
+      `;
+      return;
+    }
+
+    const total = getCartTotal();
+
+    const itemsHtml = cart.map((item) => {
+      const p = getProductById(item.productId);
+      if (!p) return "";
+      return `
+        <div class="cart-item">
+          <img src="${p.image}" alt="${p.name}">
+          <div class="cart-item-info">
+            <div class="name">${p.name}</div>
+            <div class="cat">${p.category}</div>
+            <div class="price">${formatTL(p.price)}</div>
+          </div>
+          <div class="qty-small">
+            <button onclick="changeCartQty(${p.id}, -1)">−</button>
+            <span>${item.quantity}</span>
+            <button onclick="changeCartQty(${p.id}, 1)">+</button>
+          </div>
+          <button class="remove-link" onclick="removeFromCart(${p.id}); renderCart();">Kaldır</button>
+        </div>
+      `;
+    }).join("");
+
+    container.innerHTML = `
+      <div class="cart-layout">
+        <div>
+          <h1 class="section-title">Sepetim</h1>
+          ${itemsHtml}
+        </div>
+        <div class="summary-box">
+          <h2 style="font-size:16px;font-weight:800;margin:0 0 16px;">Sipariş Özeti</h2>
+          <div class="summary-row">
+            <span class="label">Sepet Toplamı</span>
+            <span class="value">${formatTL(total)}</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Cüzdan Bakiyesi</span>
+            <span class="value">${formatTL(currentWallet)}</span>
+          </div>
+          <hr class="summary-divider">
+          <div id="checkoutMsg"></div>
+          <button class="btn-full" id="checkoutBtn" onclick="handleCheckout()">Satın Al</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function changeCartQty(productId, delta) {
+    const cart = getCart();
+    const item = cart.find((i) => i.productId === productId);
+    const product = getProductById(productId);
+    if (!item) return;
+    const next = item.quantity + delta;
+    if (next <= 0) {
+      removeFromCart(productId);
+    } else if (next <= product.stock) {
+      setCartQuantity(productId, next);
+    }
+    renderCart();
+  }
+
+  async function handleCheckout() {
+    const msgBox = document.getElementById("checkoutMsg");
+    const btn = document.getElementById("checkoutBtn");
+    msgBox.innerHTML = "";
+
+    const cart = getCart();
+    const total = getCartTotal();
+
+    if (cart.length === 0) {
+      msgBox.innerHTML = `<div class="msg error">Sepetiniz boş.</div>`;
+      return;
+    }
+    if (total > currentWallet) {
+      msgBox.innerHTML = `<div class="msg error">Yetersiz bakiye. Lütfen sepetinizi güncelleyin.</div>`;
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "İşleniyor...";
+
+    try {
+      const orderNumber = `ORDER-${Math.floor(1000 + Math.random() * 9000)}`;
+
+      const { data: order, error: orderErr } = await supabaseClient
+        .from("orders")
+        .insert({ user_id: currentUser.id, order_number: orderNumber, total_amount: total })
+        .select()
+        .single();
+      if (orderErr) throw orderErr;
+
+      const orderItems = cart.map((item) => {
+        const p = getProductById(item.productId);
+        return {
+          order_id: order.id,
+          product_id: p.id,
+          product_name: p.name,
+          quantity: item.quantity,
+          price: p.price,
+        };
+      });
+      const { error: itemsErr } = await supabaseClient.from("order_items").insert(orderItems);
+      if (itemsErr) throw itemsErr;
+
+      const newBalance = currentWallet - total;
+      const { error: walletErr } = await supabaseClient
+        .from("profiles")
+        .update({ wallet_balance: newBalance })
+        .eq("id", currentUser.id);
+      if (walletErr) throw walletErr;
+
+      clearCart();
+      window.location.href = `success.html?order=${orderNumber}&total=${total}&balance=${newBalance}`;
+    } catch (err) {
+      msgBox.innerHTML = `<div class="msg error">Bir hata oluştu: ${err.message}</div>`;
+      btn.disabled = false;
+      btn.textContent = "Satın Al";
+    }
+  }
+
+  (async () => {
+    currentUser = await requireAuth();
+    if (!currentUser) return;
+
+    currentWallet = await renderWalletBalance(currentUser.id);
+    updateCartBadge();
+    renderCart();
+  })();
+</script>
+
+</body>
+</html>
