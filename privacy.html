@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>amazoff - Ürün Detayı</title>
+<title>Gizlilik Politikası - amazoff</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -40,8 +40,34 @@
   </div>
 </header>
 
-<main class="container" id="detailContainer">
-  <!-- filled by JS -->
+<main class="container">
+  <div class="static-page">
+    <h1>Gizlilik Politikası</h1>
+    <p class="static-slogan">Verilerinizle ne yapıyoruz, ne yapmıyoruz.</p>
+
+    <h2>Topladığımız veriler</h2>
+    <ul>
+      <li>Kayıt sırasında verdiğiniz e-posta adresi ve şifreniz (Supabase Auth tarafından güvenli şekilde saklanır, şifreler hash'lenir).</li>
+      <li>Demo cüzdan bakiyeniz ve sipariş geçmişiniz.</li>
+      <li>Ayarlar sayfasından kendi isteğinizle girdiğiniz görünen ad ve gizlilik tercihiniz.</li>
+    </ul>
+
+    <h2>Toplamadığımız veriler</h2>
+    <ul>
+      <li>Gerçek ad, adres, telefon numarası veya kredi kartı bilgisi — bunları hiçbir zaman istemiyoruz.</li>
+      <li>Konum verisi.</li>
+      <li>Tarayıcı localStorage/sessionStorage kullanılmaz; tüm veriler Supabase veritabanında tutulur.</li>
+    </ul>
+
+    <h2>Verileriniz kimlerle paylaşılır?</h2>
+    <p>Sipariş verileriniz, siz "Ayarlar" sayfasından adınızın görünmesine izin vermediğiniz sürece "Anonim Kullanıcı" olarak diğer kullanıcılara açık sipariş akışında (Tüm Siparişler, İstatistikler) görünür. Cüzdan bakiyeniz, e-posta adresiniz ve kimliğiniz hiçbir zaman başka kullanıcılarla paylaşılmaz.</p>
+
+    <h2>Verilerinizi silmek isterseniz</h2>
+    <p>Hesabınızın ve verilerinizin silinmesini istiyorsanız İletişim sayfasındaki adresten bize ulaşabilirsiniz.</p>
+
+    <h2>Çerezler</h2>
+    <p>Site, oturumunuzu açık tutmak için Supabase'in kimlik doğrulama çerezlerini kullanır. Reklam veya takip amaçlı üçüncü taraf çerez kullanılmaz.</p>
+  </div>
 </main>
 
 <footer class="site-footer">
@@ -63,75 +89,12 @@
 <script src="site-ui.js"></script>
 <script src="cart.js"></script>
 <script>
-  let currentQty = 1;
-  let currentProduct = null;
-
-  function renderQty() {
-    document.getElementById("qtyValue").textContent = currentQty;
-  }
-
-  function changeQty(delta) {
-    const next = currentQty + delta;
-    if (next >= 1 && next <= currentProduct.stock) {
-      currentQty = next;
-      renderQty();
-    }
-  }
-
-  async function handleAddToCart(id, btn) {
-    await addToCart(id, currentQty);
-    btn.textContent = "Sepete Eklendi ✓";
-  }
-
-  async function handleBuyNow(id) {
-    await addToCart(id, currentQty);
-    window.location.href = "cart.html";
-  }
-
   (async () => {
     const user = await requireAuth();
     if (!user) return;
-
     renderWalletBalance(user.id);
     renderCategoryMenu();
     updateCartBadge();
-
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get("id");
-    currentProduct = getProductById(id);
-    const container = document.getElementById("detailContainer");
-
-    if (!currentProduct) {
-      container.innerHTML = `<p style="padding:60px 0;text-align:center;color:#767676;">Ürün bulunamadı. <a href="home.html" style="color:#ff6b1a;font-weight:700;">Ürünlere dön</a></p>`;
-      return;
-    }
-
-    const p = currentProduct;
-    container.innerHTML = `
-      <div class="product-detail">
-        <div class="detail-img">
-          <img src="${p.image}" alt="${p.name}">
-        </div>
-        <div>
-          <span class="detail-category">${p.category}</span>
-          <h1 class="detail-title">${p.name}</h1>
-          <p class="detail-desc">${p.description}</p>
-          <p class="detail-price">${formatTL(p.price)}</p>
-          <p class="detail-stock">Stok: ${p.stock} adet</p>
-
-          <div class="qty-selector">
-            <button onclick="changeQty(-1)">−</button>
-            <span id="qtyValue">1</span>
-            <button onclick="changeQty(1)">+</button>
-          </div>
-
-          <div class="detail-buttons">
-            <button class="btn-primary" onclick="handleAddToCart(${p.id}, this)">Sepete Ekle</button>
-            <button class="btn-outline-brand" onclick="handleBuyNow(${p.id})">Hemen Al</button>
-          </div>
-        </div>
-      </div>
-    `;
   })();
 </script>
 

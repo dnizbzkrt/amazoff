@@ -11,10 +11,12 @@ create table if not exists public.profiles (
 
 alter table public.profiles enable row level security;
 
+drop policy if exists "Kullanıcı kendi profilini görebilir" on public.profiles;
 create policy "Kullanıcı kendi profilini görebilir"
   on public.profiles for select
   using (auth.uid() = id);
 
+drop policy if exists "Kullanıcı kendi profilini güncelleyebilir" on public.profiles;
 create policy "Kullanıcı kendi profilini güncelleyebilir"
   on public.profiles for update
   using (auth.uid() = id);
@@ -45,10 +47,12 @@ create table if not exists public.orders (
 
 alter table public.orders enable row level security;
 
+drop policy if exists "Kullanıcı kendi siparişlerini görebilir" on public.orders;
 create policy "Kullanıcı kendi siparişlerini görebilir"
   on public.orders for select
   using (auth.uid() = user_id);
 
+drop policy if exists "Kullanıcı kendi siparişini oluşturabilir" on public.orders;
 create policy "Kullanıcı kendi siparişini oluşturabilir"
   on public.orders for insert
   with check (auth.uid() = user_id);
@@ -65,6 +69,7 @@ create table if not exists public.order_items (
 
 alter table public.order_items enable row level security;
 
+drop policy if exists "Kullanıcı kendi sipariş kalemlerini görebilir" on public.order_items;
 create policy "Kullanıcı kendi sipariş kalemlerini görebilir"
   on public.order_items for select
   using (
@@ -75,6 +80,7 @@ create policy "Kullanıcı kendi sipariş kalemlerini görebilir"
     )
   );
 
+drop policy if exists "Kullanıcı kendi sipariş kalemini ekleyebilir" on public.order_items;
 create policy "Kullanıcı kendi sipariş kalemini ekleyebilir"
   on public.order_items for insert
   with check (
@@ -155,3 +161,110 @@ as $$
 $$;
 
 grant execute on function public.get_order_feed_items(uuid) to authenticated;
+
+-- =========================================================================
+-- UPDATE 2 — Shared shopping cart (moved from browser localStorage to
+-- Supabase so the same cart follows a user across devices, and so friends
+-- using the site each get their own real, database-backed cart).
+-- Safe to run again — uses IF NOT EXISTS / OR REPLACE everywhere.
+-- =========================================================================
+
+create table if not exists public.cart_items (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users on delete cascade not null,
+  product_id integer not null,
+  quantity integer not null default 1,
+  updated_at timestamptz not null default now(),
+  unique (user_id, product_id)
+);
+
+alter table public.cart_items enable row level security;
+
+drop policy if exists "Kullanıcı kendi sepetini görebilir" on public.cart_items;
+create policy "Kullanıcı kendi sepetini görebilir"
+  on public.cart_items for select
+  using (auth.uid() = user_id);
+
+drop policy if exists "Kullanıcı kendi sepetine ürün ekleyebilir" on public.cart_items;
+create policy "Kullanıcı kendi sepetine ürün ekleyebilir"
+  on public.cart_items for insert
+  with check (auth.uid() = user_id);
+
+drop policy if exists "Kullanıcı kendi sepetini güncelleyebilir" on public.cart_items;
+create policy "Kullanıcı kendi sepetini güncelleyebilir"
+  on public.cart_items for update
+  using (auth.uid() = user_id);
+
+drop policy if exists "Kullanıcı kendi sepetinden ürün silebilir" on public.cart_items;
+create policy "Kullanıcı kendi sepetinden ürün silebilir"
+  on public.cart_items for delete
+  using (auth.uid() = user_id);
+
+-- =========================================================================
+-- UPDATE 3 — Starting wallet balance raised from 1.000 TL to 10.000 TL,
+-- and two new "leaderboard" style aggregate functions for the shareable
+-- stats page (En Çok Harcayanlar / Popüler Ürünler). Safe to run again.
+-- =========================================================================
+
+alter table public.profiles alter column wallet_balance set default 10000;
+
+-- Re-create the signup trigger function with the new starting balance.
+create or replace function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.profiles (id, email, wallet_balance)
+  values (new.id, new.email, 10000);
+  return new;
+end;
+$$ language plpgsql security definer;
+
+-- Leaderboard: how much each user has spent in total, safe fields only
+-- (same anonymity rule as the order feed: shows display_name only if the
+-- user opted in via Ayarlar, otherwise "Anonim Kullanıcı").
+create or replace function public.get_leaderboard()
+returns table (
+  buyer_name text,
+  total_spent numeric,
+  order_count bigint
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select
+    case
+      when p.is_public and coalesce(p.display_name, '') <> '' then p.display_name
+      else 'Anonim Kullanıcı'
+    end as buyer_name,
+    sum(o.total_amount) as total_spent,
+    count(o.id) as order_count
+  from public.orders o
+  join public.profiles p on p.id = o.user_id
+  group by o.user_id, p.is_public, p.display_name
+  order by total_spent desc
+  limit 20;
+$$;
+
+grant execute on function public.get_leaderboard() to authenticated;
+
+-- Most-purchased products across all users (product data itself lives in
+-- products.js, this just returns product_id + total quantity sold so the
+-- frontend can look up the name/image/price from PRODUCTS).
+create or replace function public.get_popular_products()
+returns table (
+  product_id integer,
+  product_name text,
+  total_quantity bigint
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select product_id, product_name, sum(quantity) as total_quantity
+  from public.order_items
+  group by product_id, product_name
+  order by total_quantity desc
+  limit 12;
+$$;
+
+grant execute on function public.get_popular_products() to authenticated;

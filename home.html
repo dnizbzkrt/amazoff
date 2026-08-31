@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>amazoff - Kozmetik &amp; Kadın Giyim</title>
+<title>amazoff - Everything you don't actually need.</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,12 +14,19 @@
       <span class="logo">amazoff</span>
       <span class="logo-slogan">everything you don't actually need</span>
     </a>
+    <div class="category-menu-wrap">
+      <button class="category-menu-trigger" onclick="toggleCategoryMenu(event)">Tüm Kategoriler ▾</button>
+      <div class="category-menu-panel" id="categoryMenuPanel"></div>
+    </div>
+    <form class="search-form" onsubmit="return handleSearch(event)">
+      <input type="text" id="searchInput" placeholder="Ürün, kategori ara...">
+      <button type="submit">🔍</button>
+    </form>
     <nav class="categories">
-      <a href="home.html">Ürünler</a>
-      <a href="home.html?category=Kozmetik">Kozmetik</a>
-      <a href="home.html?category=Kadın+Giyim">Kadın Giyim</a>
       <a href="orders.html">Siparişlerim</a>
       <a href="feed.html">Tüm Siparişler</a>
+      <a href="istatistikler.html">İstatistikler</a>
+      <a href="blog.html">Blog</a>
     </nav>
     <div class="header-actions">
       <span class="wallet-pill" id="walletDisplay">Cüzdan: -</span>
@@ -35,54 +42,88 @@
 
 <main class="container">
   <section class="hero" id="heroSection">
-    <p class="hero-eyebrow">Kozmetik &amp; Kadın Giyim</p>
+    <p class="hero-eyebrow">14 kategori, 100 ürün, 0 gerçek ihtiyaç</p>
     <h1>amazoff</h1>
     <p class="slogan">everything you don't actually need.</p>
-    <p class="desc">1.000 TL demo cüzdanınızla hemen deneme alışverişi yapın — gerçek ödeme alınmaz.</p>
-    <a href="#" class="btn-white" onclick="document.querySelector('.product-grid').scrollIntoView({behavior:'smooth'});return false;">Ürünleri Gör</a>
+    <p class="desc">10.000 TL demo cüzdanınızla dilediğinizce "alışveriş" yapın — gerçek ödeme, kargo ya da pişmanlık alınmaz (pişmanlık kısmı garanti değil).</p>
+    <a href="#productGrid" class="btn-white">Ürünleri Gör</a>
   </section>
 
-  <section class="category-tiles">
-    <a class="category-tile" href="home.html?category=Kozmetik">Kozmetik</a>
-    <a class="category-tile" href="home.html?category=Kadın+Giyim">Kadın Giyim</a>
-  </section>
+  <div class="stat-grid" id="statGrid" style="display:none;">
+    <div class="stat-card accent">
+      <div class="stat-label">Bugün Ne Kadar Gereksiz Harcadın?</div>
+      <div class="stat-value" id="statToday">0 TL</div>
+      <div class="stat-note">Bugünkü siparişlerinin toplamı.</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Toplam Gereksiz Harcaman</div>
+      <div class="stat-value" id="statTotal">0 TL</div>
+      <div class="stat-note" id="statOrderCount">0 sipariş</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Kalan Cüzdan</div>
+      <div class="stat-value" id="statWallet">-</div>
+      <div class="stat-note"><a href="istatistikler.html" style="color:#fff;text-decoration:underline;">Liderlik tablosuna bak →</a></div>
+    </div>
+  </div>
 
-  <section>
-    <h2 class="section-title" id="sectionTitle">Tüm Ürünler</h2>
-    <div class="product-grid" id="productGrid"></div>
+  <div class="random-widget" id="randomWidget" style="display:none;">
+    <img id="rwImage" src="" alt="">
+    <div>
+      <div class="rw-eyebrow">Bunu gerçekten alır mıydın?</div>
+      <div class="rw-title" id="rwName">-</div>
+      <p class="rw-desc" id="rwDesc">-</p>
+      <div class="rw-actions">
+        <button class="rw-yes" id="rwYesBtn">Evet, sepete at</button>
+        <button class="rw-no" onclick="pickRandomProduct()">Hayır, başka göster</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header-row" id="popularHeader" style="display:none;">
+    <h2 class="section-title" style="margin:0;">Popüler Ürünler</h2>
+    <a href="istatistikler.html" class="section-link">Tümünü Gör →</a>
+  </div>
+  <div class="rail" id="popularRail" style="margin-bottom:40px;"></div>
+
+  <section class="category-tiles" id="categoryTiles"></section>
+
+  <section id="productGrid">
+    <div class="section-header-row">
+      <h2 class="section-title" id="sectionTitle" style="margin:0;">Tüm Ürünler</h2>
+      <span class="results-count" id="resultsCount"></span>
+    </div>
+    <div class="product-grid dense" id="productList"></div>
   </section>
 </main>
 
 <footer class="site-footer">
   <div class="foot-slogan">everything you don't actually need.</div>
+  <div class="footer-links">
+    <a href="about.html">Hakkımızda</a>
+    <a href="blog.html">Blog</a>
+    <a href="istatistikler.html">İstatistikler</a>
+    <a href="privacy.html">Gizlilik Politikası</a>
+    <a href="terms.html">Kullanım Koşulları</a>
+    <a href="contact.html">İletişim</a>
+  </div>
   amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="products.js"></script>
+<script src="site-ui.js"></script>
 <script src="cart.js"></script>
 <script>
-  (async () => {
-    const user = await requireAuth();
-    if (!user) return;
+  let currentUser = null;
 
-    renderWalletBalance(user.id);
-    updateCartBadge();
-
-    const params = new URLSearchParams(window.location.search);
-    const category = params.get("category");
-    const list = category ? PRODUCTS.filter((p) => p.category === category) : PRODUCTS;
-
-    document.getElementById("sectionTitle").textContent = category || "Tüm Ürünler";
-    if (category) document.getElementById("heroSection").style.display = "none";
-
-    const grid = document.getElementById("productGrid");
-    grid.innerHTML = list.map((p) => `
+  function renderProductCard(p) {
+    return `
       <div class="product-card">
         <a href="product.html?id=${p.id}">
           <div class="product-img-wrap">
-            <img src="${p.image}" alt="${p.name}">
+            <img src="${p.image}" alt="${p.name}" loading="lazy">
             <span class="category-badge">${p.category}</span>
           </div>
         </a>
@@ -90,12 +131,107 @@
           <a href="product.html?id=${p.id}"><p class="product-name">${p.name}</p></a>
           <p class="product-price">${formatTL(p.price)}</p>
           <div class="product-actions">
-            <a href="product.html?id=${p.id}" class="btn-outline">Ürünü İncele</a>
+            <a href="product.html?id=${p.id}" class="btn-outline">İncele</a>
             <button class="btn-dark" onclick="addToCart(${p.id}); this.textContent='Eklendi ✓';">Sepete Ekle</button>
           </div>
         </div>
       </div>
-    `).join("");
+    `;
+  }
+
+  function pickRandomProduct() {
+    const p = PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)];
+    document.getElementById("rwImage").src = p.image;
+    document.getElementById("rwImage").alt = p.name;
+    document.getElementById("rwName").textContent = `${p.name} — ${formatTL(p.price)}`;
+    document.getElementById("rwDesc").textContent = p.description;
+    document.getElementById("rwYesBtn").onclick = function () {
+      addToCart(p.id);
+      this.textContent = "Sepete Eklendi ✓ (pişman olma vaktin geldi)";
+    };
+  }
+
+  async function loadPopularProducts() {
+    const { data, error } = await supabaseClient.rpc("get_popular_products");
+    if (error || !data || data.length === 0) return;
+
+    document.getElementById("popularHeader").style.display = "flex";
+    const rail = document.getElementById("popularRail");
+    rail.innerHTML = data.map((row) => {
+      const p = getProductById(row.product_id);
+      if (!p) return "";
+      return `
+        <a href="product.html?id=${p.id}" class="rail-card">
+          <img src="${p.image}" alt="${p.name}" loading="lazy">
+          <div class="rail-info">
+            <div class="rail-badge">${row.total_quantity} satış</div>
+            <div class="rail-name">${p.name}</div>
+            <div class="rail-meta">${formatTL(p.price)}</div>
+          </div>
+        </a>
+      `;
+    }).join("");
+  }
+
+  async function loadStats(userId) {
+    const { data: orders, error } = await supabaseClient
+      .from("orders")
+      .select("total_amount, created_at")
+      .eq("user_id", userId);
+
+    if (error || !orders) return;
+
+    const todayStr = new Date().toDateString();
+    const todayTotal = orders
+      .filter((o) => new Date(o.created_at).toDateString() === todayStr)
+      .reduce((sum, o) => sum + Number(o.total_amount), 0);
+    const total = orders.reduce((sum, o) => sum + Number(o.total_amount), 0);
+
+    document.getElementById("statToday").textContent = formatTL(todayTotal);
+    document.getElementById("statTotal").textContent = formatTL(total);
+    document.getElementById("statOrderCount").textContent = `${orders.length} sipariş`;
+    document.getElementById("statGrid").style.display = "grid";
+  }
+
+  (async () => {
+    currentUser = await requireAuth();
+    if (!currentUser) return;
+
+    const balance = await renderWalletBalance(currentUser.id);
+    document.getElementById("statWallet").textContent = formatTL(balance || 0);
+    renderCategoryMenu();
+    updateCartBadge();
+    prefillSearchBox();
+    pickRandomProduct();
+    document.getElementById("randomWidget").style.display = "flex";
+    loadStats(currentUser.id);
+    loadPopularProducts();
+
+    document.getElementById("categoryTiles").innerHTML = CATEGORIES.map(
+      (c) => `<a class="category-tile" href="home.html?category=${encodeURIComponent(c)}">${c}</a>`
+    ).join("");
+
+    const params = new URLSearchParams(window.location.search);
+    const category = params.get("category");
+    const search = params.get("search");
+
+    let list = PRODUCTS;
+    let title = "Tüm Ürünler";
+
+    if (search) {
+      list = searchProducts(search);
+      title = `"${search}" için sonuçlar`;
+      document.getElementById("heroSection").style.display = "none";
+    } else if (category) {
+      list = getProductsByCategory(category);
+      title = category;
+      document.getElementById("heroSection").style.display = "none";
+    }
+
+    document.getElementById("sectionTitle").textContent = title;
+    document.getElementById("resultsCount").textContent = `${list.length} ürün`;
+    document.getElementById("productList").innerHTML = list.map(renderProductCard).join("") ||
+      `<p class="page-subtitle">Sonuç bulunamadı. Belki de gerçekten ihtiyacın yoktur.</p>`;
   })();
 </script>
 

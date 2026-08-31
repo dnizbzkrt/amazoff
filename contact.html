@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>amazoff - Ürün Detayı</title>
+<title>İletişim - amazoff</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -40,8 +40,25 @@
   </div>
 </header>
 
-<main class="container" id="detailContainer">
-  <!-- filled by JS -->
+<main class="container">
+  <div class="static-page">
+    <h1>İletişim</h1>
+    <p class="static-slogan">Gerçek ödeme almıyoruz ama gerçek mesaj okuyoruz.</p>
+
+    <p>Site ile ilgili soru, öneri, hata bildirimi veya "bu ürün açıklaması beni çok güldürdü" gibi geri bildirimleriniz için bize aşağıdaki adresten ulaşabilirsiniz:</p>
+
+    <p style="font-size:18px;font-weight:700;color:var(--ink);">merhaba@amazoff.example</p>
+
+    <h2>Sıkça Sorulanlar</h2>
+    <h2 style="font-size:15px;margin-top:20px;">Gerçekten ürün gönderiyor musunuz?</h2>
+    <p>Hayır. amazoff tamamen bir demo/simülasyon sitesidir, hiçbir ürün kargolanmaz.</p>
+
+    <h2 style="font-size:15px;">Cüzdanım bitti, ne yapmalıyım?</h2>
+    <p>Şu an için bakiye yükleme özelliği yok — yeni bir hesap açarak tekrar 10.000 TL ile başlayabilirsiniz.</p>
+
+    <h2 style="font-size:15px;">Hesabımı silebilir misiniz?</h2>
+    <p>Evet, yukarıdaki e-posta adresinden talep etmeniz yeterli.</p>
+  </div>
 </main>
 
 <footer class="site-footer">
@@ -63,75 +80,12 @@
 <script src="site-ui.js"></script>
 <script src="cart.js"></script>
 <script>
-  let currentQty = 1;
-  let currentProduct = null;
-
-  function renderQty() {
-    document.getElementById("qtyValue").textContent = currentQty;
-  }
-
-  function changeQty(delta) {
-    const next = currentQty + delta;
-    if (next >= 1 && next <= currentProduct.stock) {
-      currentQty = next;
-      renderQty();
-    }
-  }
-
-  async function handleAddToCart(id, btn) {
-    await addToCart(id, currentQty);
-    btn.textContent = "Sepete Eklendi ✓";
-  }
-
-  async function handleBuyNow(id) {
-    await addToCart(id, currentQty);
-    window.location.href = "cart.html";
-  }
-
   (async () => {
     const user = await requireAuth();
     if (!user) return;
-
     renderWalletBalance(user.id);
     renderCategoryMenu();
     updateCartBadge();
-
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get("id");
-    currentProduct = getProductById(id);
-    const container = document.getElementById("detailContainer");
-
-    if (!currentProduct) {
-      container.innerHTML = `<p style="padding:60px 0;text-align:center;color:#767676;">Ürün bulunamadı. <a href="home.html" style="color:#ff6b1a;font-weight:700;">Ürünlere dön</a></p>`;
-      return;
-    }
-
-    const p = currentProduct;
-    container.innerHTML = `
-      <div class="product-detail">
-        <div class="detail-img">
-          <img src="${p.image}" alt="${p.name}">
-        </div>
-        <div>
-          <span class="detail-category">${p.category}</span>
-          <h1 class="detail-title">${p.name}</h1>
-          <p class="detail-desc">${p.description}</p>
-          <p class="detail-price">${formatTL(p.price)}</p>
-          <p class="detail-stock">Stok: ${p.stock} adet</p>
-
-          <div class="qty-selector">
-            <button onclick="changeQty(-1)">−</button>
-            <span id="qtyValue">1</span>
-            <button onclick="changeQty(1)">+</button>
-          </div>
-
-          <div class="detail-buttons">
-            <button class="btn-primary" onclick="handleAddToCart(${p.id}, this)">Sepete Ekle</button>
-            <button class="btn-outline-brand" onclick="handleBuyNow(${p.id})">Hemen Al</button>
-          </div>
-        </div>
-      </div>
-    `;
   })();
 </script>
 

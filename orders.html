@@ -14,12 +14,19 @@
       <span class="logo">amazoff</span>
       <span class="logo-slogan">everything you don't actually need</span>
     </a>
+    <div class="category-menu-wrap">
+      <button class="category-menu-trigger" onclick="toggleCategoryMenu(event)">Tüm Kategoriler ▾</button>
+      <div class="category-menu-panel" id="categoryMenuPanel"></div>
+    </div>
+    <form class="search-form" onsubmit="return handleSearch(event)">
+      <input type="text" id="searchInput" placeholder="Ürün, kategori ara...">
+      <button type="submit">🔍</button>
+    </form>
     <nav class="categories">
-      <a href="home.html">Ürünler</a>
-      <a href="home.html?category=Kozmetik">Kozmetik</a>
-      <a href="home.html?category=Kadın+Giyim">Kadın Giyim</a>
       <a href="orders.html">Siparişlerim</a>
       <a href="feed.html">Tüm Siparişler</a>
+      <a href="istatistikler.html">İstatistikler</a>
+      <a href="blog.html">Blog</a>
     </nav>
     <div class="header-actions">
       <span class="wallet-pill" id="walletDisplay">Cüzdan: -</span>
@@ -41,6 +48,21 @@
     </div>
   </div>
 
+  <div class="stat-grid" id="statGrid" style="display:none;margin-bottom:32px;">
+    <div class="stat-card accent">
+      <div class="stat-label">Bugün Ne Kadar Gereksiz Harcadın?</div>
+      <div class="stat-value" id="statToday">0 TL</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Toplam Gereksiz Harcaman</div>
+      <div class="stat-value" id="statTotal">0 TL</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Sipariş Sayısı</div>
+      <div class="stat-value" id="statCount">0</div>
+    </div>
+  </div>
+
   <div id="ordersList">
     <p class="page-subtitle">Yükleniyor...</p>
   </div>
@@ -48,12 +70,21 @@
 
 <footer class="site-footer">
   <div class="foot-slogan">everything you don't actually need.</div>
+  <div class="footer-links">
+    <a href="about.html">Hakkımızda</a>
+    <a href="blog.html">Blog</a>
+    <a href="istatistikler.html">İstatistikler</a>
+    <a href="privacy.html">Gizlilik Politikası</a>
+    <a href="terms.html">Kullanım Koşulları</a>
+    <a href="contact.html">İletişim</a>
+  </div>
   amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="products.js"></script>
+<script src="site-ui.js"></script>
 <script src="cart.js"></script>
 <script>
   function toggleOrder(card) {
@@ -79,6 +110,7 @@
     if (!user) return;
 
     renderWalletBalance(user.id);
+    renderCategoryMenu();
     updateCartBadge();
 
     const { data: orders, error } = await supabaseClient
@@ -103,6 +135,17 @@
       `;
       return;
     }
+
+    const todayStr = new Date().toDateString();
+    const todayTotal = orders
+      .filter((o) => new Date(o.created_at).toDateString() === todayStr)
+      .reduce((sum, o) => sum + Number(o.total_amount), 0);
+    const grandTotal = orders.reduce((sum, o) => sum + Number(o.total_amount), 0);
+
+    document.getElementById("statToday").textContent = formatTL(todayTotal);
+    document.getElementById("statTotal").textContent = formatTL(grandTotal);
+    document.getElementById("statCount").textContent = orders.length;
+    document.getElementById("statGrid").style.display = "grid";
 
     list.innerHTML = orders.map((o, idx) => `
       <div class="order-card" id="order-${idx}">

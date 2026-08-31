@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>amazoff - Ürün Detayı</title>
+<title>amazoff Blog - Gereksiz Alışveriş Rehberi</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -40,8 +40,15 @@
   </div>
 </header>
 
-<main class="container" id="detailContainer">
-  <!-- filled by JS -->
+<main class="container">
+  <div class="page-header">
+    <div>
+      <h1 class="section-title">Blog / Rehber</h1>
+      <p class="page-subtitle">Gereksiz alışveriş üzerine kısa yazılar. Hiçbiri hayatınızı değiştirmeyecek.</p>
+    </div>
+  </div>
+
+  <div class="blog-grid" id="blogGrid"></div>
 </main>
 
 <footer class="site-footer">
@@ -62,32 +69,8 @@
 <script src="products.js"></script>
 <script src="site-ui.js"></script>
 <script src="cart.js"></script>
+<script src="blog-data.js"></script>
 <script>
-  let currentQty = 1;
-  let currentProduct = null;
-
-  function renderQty() {
-    document.getElementById("qtyValue").textContent = currentQty;
-  }
-
-  function changeQty(delta) {
-    const next = currentQty + delta;
-    if (next >= 1 && next <= currentProduct.stock) {
-      currentQty = next;
-      renderQty();
-    }
-  }
-
-  async function handleAddToCart(id, btn) {
-    await addToCart(id, currentQty);
-    btn.textContent = "Sepete Eklendi ✓";
-  }
-
-  async function handleBuyNow(id) {
-    await addToCart(id, currentQty);
-    window.location.href = "cart.html";
-  }
-
   (async () => {
     const user = await requireAuth();
     if (!user) return;
@@ -96,42 +79,14 @@
     renderCategoryMenu();
     updateCartBadge();
 
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get("id");
-    currentProduct = getProductById(id);
-    const container = document.getElementById("detailContainer");
-
-    if (!currentProduct) {
-      container.innerHTML = `<p style="padding:60px 0;text-align:center;color:#767676;">Ürün bulunamadı. <a href="home.html" style="color:#ff6b1a;font-weight:700;">Ürünlere dön</a></p>`;
-      return;
-    }
-
-    const p = currentProduct;
-    container.innerHTML = `
-      <div class="product-detail">
-        <div class="detail-img">
-          <img src="${p.image}" alt="${p.name}">
-        </div>
-        <div>
-          <span class="detail-category">${p.category}</span>
-          <h1 class="detail-title">${p.name}</h1>
-          <p class="detail-desc">${p.description}</p>
-          <p class="detail-price">${formatTL(p.price)}</p>
-          <p class="detail-stock">Stok: ${p.stock} adet</p>
-
-          <div class="qty-selector">
-            <button onclick="changeQty(-1)">−</button>
-            <span id="qtyValue">1</span>
-            <button onclick="changeQty(1)">+</button>
-          </div>
-
-          <div class="detail-buttons">
-            <button class="btn-primary" onclick="handleAddToCart(${p.id}, this)">Sepete Ekle</button>
-            <button class="btn-outline-brand" onclick="handleBuyNow(${p.id})">Hemen Al</button>
-          </div>
-        </div>
-      </div>
-    `;
+    document.getElementById("blogGrid").innerHTML = BLOG_POSTS.map((post) => `
+      <a href="blog-post.html?slug=${post.slug}" class="blog-card">
+        <div class="blog-tag">${post.tag}</div>
+        <h3>${post.title}</h3>
+        <p>${post.excerpt}</p>
+        <div class="blog-read">Devamını Oku →</div>
+      </a>
+    `).join("");
   })();
 </script>
 

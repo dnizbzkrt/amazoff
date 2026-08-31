@@ -14,12 +14,19 @@
       <span class="logo">amazoff</span>
       <span class="logo-slogan">everything you don't actually need</span>
     </a>
+    <div class="category-menu-wrap">
+      <button class="category-menu-trigger" onclick="toggleCategoryMenu(event)">Tüm Kategoriler ▾</button>
+      <div class="category-menu-panel" id="categoryMenuPanel"></div>
+    </div>
+    <form class="search-form" onsubmit="return handleSearch(event)">
+      <input type="text" id="searchInput" placeholder="Ürün, kategori ara...">
+      <button type="submit">🔍</button>
+    </form>
     <nav class="categories">
-      <a href="home.html">Ürünler</a>
-      <a href="home.html?category=Kozmetik">Kozmetik</a>
-      <a href="home.html?category=Kadın+Giyim">Kadın Giyim</a>
       <a href="orders.html">Siparişlerim</a>
       <a href="feed.html">Tüm Siparişler</a>
+      <a href="istatistikler.html">İstatistikler</a>
+      <a href="blog.html">Blog</a>
     </nav>
     <div class="header-actions">
       <span class="wallet-pill" id="walletDisplay">Cüzdan: -</span>
@@ -34,37 +41,49 @@
 </header>
 
 <main class="container" id="cartContainer">
-  <!-- filled by JS -->
+  <p class="page-subtitle">Yükleniyor...</p>
 </main>
 
 <footer class="site-footer">
   <div class="foot-slogan">everything you don't actually need.</div>
+  <div class="footer-links">
+    <a href="about.html">Hakkımızda</a>
+    <a href="blog.html">Blog</a>
+    <a href="istatistikler.html">İstatistikler</a>
+    <a href="privacy.html">Gizlilik Politikası</a>
+    <a href="terms.html">Kullanım Koşulları</a>
+    <a href="contact.html">İletişim</a>
+  </div>
   amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="products.js"></script>
+<script src="site-ui.js"></script>
 <script src="cart.js"></script>
 <script>
   let currentUser = null;
   let currentWallet = 0;
 
-  function renderCart() {
-    const cart = getCart();
+  async function renderCart() {
+    const cart = await getCart();
     const container = document.getElementById("cartContainer");
 
     if (cart.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
-          <p>Sepetiniz boş.</p>
-          <a href="home.html" class="icon-btn" style="display:inline-block;margin-top:12px;">Alışverişe Başla</a>
+          <p>Sepetiniz boş. Bu aslında sağlıklı bir durum.</p>
+          <a href="home.html" class="icon-btn" style="display:inline-block;margin-top:12px;">Yine de Alışverişe Başla</a>
         </div>
       `;
       return;
     }
 
-    const total = getCartTotal();
+    const total = cart.reduce((sum, item) => {
+      const p = getProductById(item.productId);
+      return sum + (p ? p.price * item.quantity : 0);
+    }, 0);
 
     const itemsHtml = cart.map((item) => {
       const p = getProductById(item.productId);
@@ -82,7 +101,7 @@
             <span>${item.quantity}</span>
             <button onclick="changeCartQty(${p.id}, 1)">+</button>
           </div>
-          <button class="remove-link" onclick="removeFromCart(${p.id}); renderCart();">Kaldır</button>
+          <button class="remove-link" onclick="handleRemove(${p.id})">Kaldır</button>
         </div>
       `;
     }).join("");
@@ -111,16 +130,21 @@
     `;
   }
 
-  function changeCartQty(productId, delta) {
-    const cart = getCart();
+  async function handleRemove(productId) {
+    await removeFromCart(productId);
+    renderCart();
+  }
+
+  async function changeCartQty(productId, delta) {
+    const cart = await getCart();
     const item = cart.find((i) => i.productId === productId);
     const product = getProductById(productId);
     if (!item) return;
     const next = item.quantity + delta;
     if (next <= 0) {
-      removeFromCart(productId);
+      await removeFromCart(productId);
     } else if (next <= product.stock) {
-      setCartQuantity(productId, next);
+      await setCartQuantity(productId, next);
     }
     renderCart();
   }
@@ -130,8 +154,11 @@
     const btn = document.getElementById("checkoutBtn");
     msgBox.innerHTML = "";
 
-    const cart = getCart();
-    const total = getCartTotal();
+    const cart = await getCart();
+    const total = cart.reduce((sum, item) => {
+      const p = getProductById(item.productId);
+      return sum + (p ? p.price * item.quantity : 0);
+    }, 0);
 
     if (cart.length === 0) {
       msgBox.innerHTML = `<div class="msg error">Sepetiniz boş.</div>`;
@@ -175,7 +202,7 @@
         .eq("id", currentUser.id);
       if (walletErr) throw walletErr;
 
-      clearCart();
+      await clearCart();
       window.location.href = `success.html?order=${orderNumber}&total=${total}&balance=${newBalance}`;
     } catch (err) {
       msgBox.innerHTML = `<div class="msg error">Bir hata oluştu: ${err.message}</div>`;
@@ -189,6 +216,7 @@
     if (!currentUser) return;
 
     currentWallet = await renderWalletBalance(currentUser.id);
+    renderCategoryMenu();
     updateCartBadge();
     renderCart();
   })();

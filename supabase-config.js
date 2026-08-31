@@ -46,7 +46,7 @@ async function getWalletBalance(userId) {
   return Number(data.wallet_balance);
 }
 
-// Render "Wallet: 1.000 TL" into any element with id="walletDisplay".
+// Render "Wallet: 10.000 TL" into any element with id="walletDisplay".
 async function renderWalletBalance(userId) {
   const el = document.getElementById("walletDisplay");
   if (!el) return;

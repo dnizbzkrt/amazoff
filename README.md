@@ -2,16 +2,27 @@
 
 *everything you don't actually need.*
 
-Kozmetik ve Kadın Giyim kategorilerinde 5 ürünlük mini e-ticaret MVP'si.
-Gerçek ödeme yoktur — kullanıcı kayıt olduğunda **1.000 TL** demo cüzdan
+100 ürün, 14 kategori: bir marketplace deneyimi simülasyonu. Gerçek
+ödeme yoktur — kullanıcı kayıt olduğunda **10.000 TL** demo cüzdan
 bakiyesi alır ve alışverişini bu bakiye ile simüle eder.
 
 **Stack:** Düz HTML + CSS + JavaScript (framework/build yok) + Supabase
-(Auth + Database, ücretsiz plan) — doğrudan **GitHub Pages** üzerinde
-yayınlanabilir.
+(Auth + Database, ücretsiz plan) — **GitHub Pages** üzerinde yayınlanır.
+Hiçbir veri tarayıcıda (localStorage) tutulmaz; sepet dahil her şey
+Supabase'de toplanır, böylece arkadaşlarınız da kendi hesaplarıyla
+kullanabilir.
 
-Kurulum adımları (Supabase + GitHub + GitHub Pages) için **[SETUP.md](SETUP.md)**
-dosyasına bakın.
+Kurulum için **[SETUP.md](SETUP.md)** dosyasına bakın.
+
+## Öne çıkanlar
+
+- 🛍️ 100 ürün, 14 kategori, arama + kategori filtresi
+- 💸 10.000 TL demo cüzdan, sepet ve satın alma tamamen Supabase'de
+- 📦 Siparişlerim / Tüm Siparişler (isim gizliliği kullanıcı tercihine bağlı)
+- 🏆 İstatistikler: en çok harcayanlar liderlik tablosu + en popüler ürünler
+- 🎲 "Bunu gerçekten alır mıydın?" rastgele ürün widget'ı
+- 📝 Blog: gereksiz alışveriş üzerine 5 orijinal yazı
+- 📄 Hakkımızda / Gizlilik / İletişim / Kullanım Koşulları sayfaları
 
 ## Hızlı özet
 
@@ -20,11 +31,3 @@ dosyasına bakın.
 2. Bu klasörü GitHub reponuza push edin.
 3. Repo **Settings > Pages** kısmından `main` branch / root klasörü seçip
    yayınlayın.
-
-Site açıldığında: Kayıt Ol → 1.000 TL bakiye → ürünleri gez → sepete ekle →
-Satın Al → sipariş Supabase'e kaydedilir, bakiye güncellenir.
-
-**Siparişlerim** sayfasından kendi geçmişinizi, **Tüm Siparişler**
-sayfasından ise herkesin siparişlerini görebilirsiniz — isminizin bu akışta
-görünüp görünmeyeceğini **Ayarlar** sayfasından siz belirlersiniz (varsayılan:
-anonim).
