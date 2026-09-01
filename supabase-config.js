@@ -51,10 +51,28 @@ async function renderWalletBalance(userId) {
   const el = document.getElementById("walletDisplay");
   if (!el) return;
   const balance = await getWalletBalance(userId);
-  el.textContent = `Cüzdan: ${formatTL(balance)}`;
+  const label = typeof tt === "function" ? tt("Cüzdan", "Wallet") : "Cüzdan";
+  el.textContent = `${label}: ${formatTL(balance)}`;
   return balance;
 }
 
 function formatTL(amount) {
   return `${Number(amount).toLocaleString("tr-TR")} TL`;
+}
+
+// Language preference — stored in Supabase (profiles.language), never in
+// the browser, so it stays consistent with the rest of the site's data
+// model and works the same for every friend using the site.
+async function getLanguage(userId) {
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("language")
+    .eq("id", userId)
+    .single();
+  if (error || !data) return "tr";
+  return data.language || "tr";
+}
+
+async function setLanguage(userId, lang) {
+  await supabaseClient.from("profiles").update({ language: lang }).eq("id", userId);
 }

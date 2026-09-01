@@ -15,27 +15,28 @@
       <span class="logo-slogan">everything you don't actually need</span>
     </a>
     <div class="category-menu-wrap">
-      <button class="category-menu-trigger" onclick="toggleCategoryMenu(event)">Tüm Kategoriler ▾</button>
+      <button class="category-menu-trigger" onclick="toggleCategoryMenu(event)" data-i18n-en="All Categories ▾">Tüm Kategoriler ▾</button>
       <div class="category-menu-panel" id="categoryMenuPanel"></div>
     </div>
     <form class="search-form" onsubmit="return handleSearch(event)">
-      <input type="text" id="searchInput" placeholder="Ürün, kategori ara...">
+      <input type="text" id="searchInput" placeholder="Ürün, kategori ara..." data-i18n-en-placeholder="Search products, categories...">
       <button type="submit">🔍</button>
     </form>
     <nav class="categories">
-      <a href="orders.html">Siparişlerim</a>
-      <a href="feed.html">Tüm Siparişler</a>
-      <a href="istatistikler.html">İstatistikler</a>
-      <a href="blog.html">Blog</a>
+      <a href="orders.html" data-i18n-en="My Orders">Siparişlerim</a>
+      <a href="feed.html" data-i18n-en="All Orders">Tüm Siparişler</a>
+      <a href="istatistikler.html" data-i18n-en="Stats">İstatistikler</a>
+      <a href="blog.html" data-i18n-en="Blog">Blog</a>
     </nav>
     <div class="header-actions">
+      <div class="lang-switch" id="langSwitch"></div>
       <span class="wallet-pill" id="walletDisplay">Cüzdan: -</span>
-      <a href="settings.html" class="icon-btn icon-btn-ghost">Ayarlar</a>
+      <a href="settings.html" class="icon-btn icon-btn-ghost" data-i18n-en="Settings">Ayarlar</a>
       <a href="cart.html" class="icon-btn">
-        Sepet
+        <span data-i18n-en="Cart">Sepet</span>
         <span class="cart-badge" id="cartBadge">0</span>
       </a>
-      <a href="#" class="logout-link" onclick="logout(); return false;">Çıkış</a>
+      <a href="#" class="logout-link" onclick="logout(); return false;" data-i18n-en="Log Out">Çıkış</a>
     </div>
   </div>
 </header>
@@ -43,46 +44,47 @@
 <main class="container">
   <div class="page-header">
     <div>
-      <h1 class="section-title">Siparişlerim</h1>
-      <p class="page-subtitle">Bugüne kadar verdiğiniz tüm siparişler burada listelenir.</p>
+      <h1 class="section-title" data-i18n-en="My Orders">Siparişlerim</h1>
+      <p class="page-subtitle" data-i18n-en="All orders you've placed so far are listed here.">Bugüne kadar verdiğiniz tüm siparişler burada listelenir.</p>
     </div>
   </div>
 
   <div class="stat-grid" id="statGrid" style="display:none;margin-bottom:32px;">
     <div class="stat-card accent">
-      <div class="stat-label">Bugün Ne Kadar Gereksiz Harcadın?</div>
+      <div class="stat-label" data-i18n-en="How Much Have You Wasted Today?">Bugün Ne Kadar Gereksiz Harcadın?</div>
       <div class="stat-value" id="statToday">0 TL</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Toplam Gereksiz Harcaman</div>
+      <div class="stat-label" data-i18n-en="Total Wasted So Far">Toplam Gereksiz Harcaman</div>
       <div class="stat-value" id="statTotal">0 TL</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Sipariş Sayısı</div>
+      <div class="stat-label" data-i18n-en="Number of Orders">Sipariş Sayısı</div>
       <div class="stat-value" id="statCount">0</div>
     </div>
   </div>
 
   <div id="ordersList">
-    <p class="page-subtitle">Yükleniyor...</p>
+    <p class="page-subtitle" data-i18n-en="Loading...">Yükleniyor...</p>
   </div>
 </main>
 
 <footer class="site-footer">
-  <div class="foot-slogan">everything you don't actually need.</div>
+  <div class="foot-slogan" data-i18n-en="everything you don't actually need.">everything you don't actually need.</div>
   <div class="footer-links">
-    <a href="about.html">Hakkımızda</a>
-    <a href="blog.html">Blog</a>
-    <a href="istatistikler.html">İstatistikler</a>
-    <a href="privacy.html">Gizlilik Politikası</a>
-    <a href="terms.html">Kullanım Koşulları</a>
-    <a href="contact.html">İletişim</a>
+    <a href="about.html" data-i18n-en="About">Hakkımızda</a>
+    <a href="blog.html" data-i18n-en="Blog">Blog</a>
+    <a href="istatistikler.html" data-i18n-en="Stats">İstatistikler</a>
+    <a href="privacy.html" data-i18n-en="Privacy Policy">Gizlilik Politikası</a>
+    <a href="terms.html" data-i18n-en="Terms of Use">Kullanım Koşulları</a>
+    <a href="contact.html" data-i18n-en="Contact">İletişim</a>
   </div>
-  amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.
+  <span data-i18n-en="amazoff — a demo shopping project. No real payments are taken.">amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.</span>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
+<script src="i18n.js"></script>
 <script src="products.js"></script>
 <script src="site-ui.js"></script>
 <script src="cart.js"></script>
@@ -93,7 +95,7 @@
 
   function formatDate(iso) {
     const d = new Date(iso);
-    return d.toLocaleDateString("tr-TR", { day: "2-digit", month: "long", year: "numeric" });
+    return d.toLocaleDateString(currentLang === "en" ? "en-US" : "tr-TR", { day: "2-digit", month: "long", year: "numeric" });
   }
 
   async function loadOrderItems(orderId) {
@@ -109,7 +111,9 @@
     const user = await requireAuth();
     if (!user) return;
 
+    await initLangSwitch(user.id);
     renderWalletBalance(user.id);
+    await loadProducts();
     renderCategoryMenu();
     updateCartBadge();
 
@@ -122,15 +126,15 @@
     const list = document.getElementById("ordersList");
 
     if (error) {
-      list.innerHTML = `<div class="msg error">Siparişler yüklenemedi: ${error.message}</div>`;
+      list.innerHTML = `<div class="msg error">${tt("Siparişler yüklenemedi", "Couldn't load orders")}: ${error.message}</div>`;
       return;
     }
 
     if (!orders || orders.length === 0) {
       list.innerHTML = `
         <div class="empty-state">
-          <p>Henüz hiç sipariş vermediniz.</p>
-          <a href="home.html" class="icon-btn" style="display:inline-block;margin-top:12px;">Alışverişe Başla</a>
+          <p>${tt("Henüz hiç sipariş vermediniz.", "You haven't placed any orders yet.")}</p>
+          <a href="home.html" class="icon-btn" style="display:inline-block;margin-top:12px;">${tt("Alışverişe Başla", "Start Shopping")}</a>
         </div>
       `;
       return;
@@ -160,7 +164,7 @@
           </div>
         </div>
         <div class="order-items-list" id="items-${idx}">
-          <p class="page-subtitle">Yükleniyor...</p>
+          <p class="page-subtitle">${tt("Yükleniyor...", "Loading...")}</p>
         </div>
       </div>
     `).join("");
@@ -180,7 +184,7 @@
         <span class="item-name">${it.product_name}<span class="item-qty">x${it.quantity}</span></span>
         <span class="item-price">${formatTL(it.price * it.quantity)}</span>
       </div>
-    `).join("") || `<p class="page-subtitle">Ürün bulunamadı.</p>`;
+    `).join("") || `<p class="page-subtitle">${tt("Ürün bulunamadı.", "No items found.")}</p>`;
     loadedOrders[idx] = true;
   }
 </script>

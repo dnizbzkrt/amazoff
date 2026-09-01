@@ -6,7 +6,7 @@ function renderCategoryMenu() {
   const panel = document.getElementById("categoryMenuPanel");
   if (!panel) return;
   panel.innerHTML = CATEGORIES.map(
-    (c) => `<a href="home.html?category=${encodeURIComponent(c)}">${c}</a>`
+    (c) => `<a href="home.html?category=${encodeURIComponent(c.name)}">${tt(c.name, c.name_en)}</a>`
   ).join("");
 }
 

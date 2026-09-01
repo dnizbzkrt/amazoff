@@ -15,27 +15,28 @@
       <span class="logo-slogan">everything you don't actually need</span>
     </a>
     <div class="category-menu-wrap">
-      <button class="category-menu-trigger" onclick="toggleCategoryMenu(event)">Tüm Kategoriler ▾</button>
+      <button class="category-menu-trigger" onclick="toggleCategoryMenu(event)" data-i18n-en="All Categories ▾">Tüm Kategoriler ▾</button>
       <div class="category-menu-panel" id="categoryMenuPanel"></div>
     </div>
     <form class="search-form" onsubmit="return handleSearch(event)">
-      <input type="text" id="searchInput" placeholder="Ürün, kategori ara...">
+      <input type="text" id="searchInput" placeholder="Ürün, kategori ara..." data-i18n-en-placeholder="Search products, categories...">
       <button type="submit">🔍</button>
     </form>
     <nav class="categories">
-      <a href="orders.html">Siparişlerim</a>
-      <a href="feed.html">Tüm Siparişler</a>
-      <a href="istatistikler.html">İstatistikler</a>
-      <a href="blog.html">Blog</a>
+      <a href="orders.html" data-i18n-en="My Orders">Siparişlerim</a>
+      <a href="feed.html" data-i18n-en="All Orders">Tüm Siparişler</a>
+      <a href="istatistikler.html" data-i18n-en="Stats">İstatistikler</a>
+      <a href="blog.html" data-i18n-en="Blog">Blog</a>
     </nav>
     <div class="header-actions">
+      <div class="lang-switch" id="langSwitch"></div>
       <span class="wallet-pill" id="walletDisplay">Cüzdan: -</span>
-      <a href="settings.html" class="icon-btn icon-btn-ghost">Ayarlar</a>
+      <a href="settings.html" class="icon-btn icon-btn-ghost" data-i18n-en="Settings">Ayarlar</a>
       <a href="cart.html" class="icon-btn">
-        Sepet
+        <span data-i18n-en="Cart">Sepet</span>
         <span class="cart-badge" id="cartBadge">0</span>
       </a>
-      <a href="#" class="logout-link" onclick="logout(); return false;">Çıkış</a>
+      <a href="#" class="logout-link" onclick="logout(); return false;" data-i18n-en="Log Out">Çıkış</a>
     </div>
   </div>
 </header>
@@ -43,42 +44,43 @@
 <main class="container">
   <div class="page-header">
     <div>
-      <h1 class="section-title">Tüm Siparişler</h1>
-      <p class="page-subtitle">
+      <h1 class="section-title" data-i18n-en="All Orders">Tüm Siparişler</h1>
+      <p class="page-subtitle" id="feedSubtitle">
         amazoff kullanıcılarının verdiği tüm siparişler. Kullanıcılar
-        isimlerini <a href="settings.html" style="color:var(--brand);font-weight:700;">Ayarlar</a>
+        isimlerini <a href="settings.html" style="color:var(--accent);font-weight:700;">Ayarlar</a>
         sayfasından açık veya anonim gösterebilir.
       </p>
     </div>
   </div>
 
   <div id="feedList">
-    <p class="page-subtitle">Yükleniyor...</p>
+    <p class="page-subtitle" data-i18n-en="Loading...">Yükleniyor...</p>
   </div>
 </main>
 
 <footer class="site-footer">
-  <div class="foot-slogan">everything you don't actually need.</div>
+  <div class="foot-slogan" data-i18n-en="everything you don't actually need.">everything you don't actually need.</div>
   <div class="footer-links">
-    <a href="about.html">Hakkımızda</a>
-    <a href="blog.html">Blog</a>
-    <a href="istatistikler.html">İstatistikler</a>
-    <a href="privacy.html">Gizlilik Politikası</a>
-    <a href="terms.html">Kullanım Koşulları</a>
-    <a href="contact.html">İletişim</a>
+    <a href="about.html" data-i18n-en="About">Hakkımızda</a>
+    <a href="blog.html" data-i18n-en="Blog">Blog</a>
+    <a href="istatistikler.html" data-i18n-en="Stats">İstatistikler</a>
+    <a href="privacy.html" data-i18n-en="Privacy Policy">Gizlilik Politikası</a>
+    <a href="terms.html" data-i18n-en="Terms of Use">Kullanım Koşulları</a>
+    <a href="contact.html" data-i18n-en="Contact">İletişim</a>
   </div>
-  amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.
+  <span data-i18n-en="amazoff — a demo shopping project. No real payments are taken.">amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.</span>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
+<script src="i18n.js"></script>
 <script src="products.js"></script>
 <script src="site-ui.js"></script>
 <script src="cart.js"></script>
 <script>
   function formatDate(iso) {
     const d = new Date(iso);
-    return d.toLocaleDateString("tr-TR", { day: "2-digit", month: "long", year: "numeric" });
+    return d.toLocaleDateString(currentLang === "en" ? "en-US" : "tr-TR", { day: "2-digit", month: "long", year: "numeric" });
   }
 
   async function loadOrderItems(orderId) {
@@ -104,7 +106,7 @@
         <span class="item-name">${it.product_name}<span class="item-qty">x${it.quantity}</span></span>
         <span class="item-price">${formatTL(it.price * it.quantity)}</span>
       </div>
-    `).join("") || `<p class="page-subtitle">Ürün bulunamadı.</p>`;
+    `).join("") || `<p class="page-subtitle">${tt("Ürün bulunamadı.", "No items found.")}</p>`;
     loadedFeedItems[idx] = true;
   }
 
@@ -112,7 +114,13 @@
     const user = await requireAuth();
     if (!user) return;
 
+    await initLangSwitch(user.id);
+    document.getElementById("feedSubtitle").innerHTML = tt(
+      `amazoff kullanıcılarının verdiği tüm siparişler. Kullanıcılar isimlerini <a href="settings.html" style="color:var(--accent);font-weight:700;">Ayarlar</a> sayfasından açık veya anonim gösterebilir.`,
+      `Every order placed by amazoff users. People can choose to show or hide their name from <a href="settings.html" style="color:var(--accent);font-weight:700;">Settings</a>.`
+    );
     renderWalletBalance(user.id);
+    await loadProducts();
     renderCategoryMenu();
     updateCartBadge();
 
@@ -120,16 +128,17 @@
     const list = document.getElementById("feedList");
 
     if (error) {
-      list.innerHTML = `<div class="msg error">Sipariş akışı yüklenemedi: ${error.message}<br><br>
-        Bu özelliğin çalışması için <code>supabase-setup.sql</code> dosyasındaki
-        "UPDATE" bölümünü Supabase SQL Editor'da çalıştırmanız gerekir.</div>`;
+      list.innerHTML = `<div class="msg error">${tt("Sipariş akışı yüklenemedi", "Couldn't load the order feed")}: ${error.message}<br><br>
+        ${tt('Bu özelliğin çalışması için', 'For this feature to work, run the')} <code>supabase-setup.sql</code> ${tt("dosyasındaki \"UPDATE\" bölümünü Supabase SQL Editor'da çalıştırmanız gerekir.", "file's \"UPDATE\" sections in the Supabase SQL Editor.")}</div>`;
       return;
     }
 
     if (!feed || feed.length === 0) {
-      list.innerHTML = `<div class="empty-state"><p>Henüz hiç sipariş verilmemiş.</p></div>`;
+      list.innerHTML = `<div class="empty-state"><p>${tt("Henüz hiç sipariş verilmemiş.", "No orders have been placed yet.")}</p></div>`;
       return;
     }
+
+    const anonLabel = tt("Anonim Kullanıcı", "Anonymous User");
 
     list.innerHTML = feed.map((o, idx) => `
       <div class="order-card" id="feed-order-${idx}">
@@ -138,7 +147,7 @@
             <div class="order-number">${o.order_number}</div>
             <div class="order-meta">
               ${formatDate(o.created_at)} ·
-              <span class="buyer-tag ${o.buyer_name === 'Anonim Kullanıcı' ? 'anon' : ''}">${o.buyer_name}</span>
+              <span class="buyer-tag ${o.buyer_name === 'Anonim Kullanıcı' ? 'anon' : ''}">${o.buyer_name === 'Anonim Kullanıcı' ? anonLabel : o.buyer_name}</span>
             </div>
           </div>
           <div class="order-card-right">
@@ -147,7 +156,7 @@
           </div>
         </div>
         <div class="order-items-list" id="feed-items-${idx}">
-          <p class="page-subtitle">Yükleniyor...</p>
+          <p class="page-subtitle">${tt("Yükleniyor...", "Loading...")}</p>
         </div>
       </div>
     `).join("");

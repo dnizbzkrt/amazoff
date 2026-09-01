@@ -15,27 +15,28 @@
       <span class="logo-slogan">everything you don't actually need</span>
     </a>
     <div class="category-menu-wrap">
-      <button class="category-menu-trigger" onclick="toggleCategoryMenu(event)">Tüm Kategoriler ▾</button>
+      <button class="category-menu-trigger" onclick="toggleCategoryMenu(event)" data-i18n-en="All Categories ▾">Tüm Kategoriler ▾</button>
       <div class="category-menu-panel" id="categoryMenuPanel"></div>
     </div>
     <form class="search-form" onsubmit="return handleSearch(event)">
-      <input type="text" id="searchInput" placeholder="Ürün, kategori ara...">
+      <input type="text" id="searchInput" placeholder="Ürün, kategori ara..." data-i18n-en-placeholder="Search products, categories...">
       <button type="submit">🔍</button>
     </form>
     <nav class="categories">
-      <a href="orders.html">Siparişlerim</a>
-      <a href="feed.html">Tüm Siparişler</a>
-      <a href="istatistikler.html">İstatistikler</a>
-      <a href="blog.html">Blog</a>
+      <a href="orders.html" data-i18n-en="My Orders">Siparişlerim</a>
+      <a href="feed.html" data-i18n-en="All Orders">Tüm Siparişler</a>
+      <a href="istatistikler.html" data-i18n-en="Stats">İstatistikler</a>
+      <a href="blog.html" data-i18n-en="Blog">Blog</a>
     </nav>
     <div class="header-actions">
+      <div class="lang-switch" id="langSwitch"></div>
       <span class="wallet-pill" id="walletDisplay">Cüzdan: -</span>
-      <a href="settings.html" class="icon-btn icon-btn-ghost">Ayarlar</a>
+      <a href="settings.html" class="icon-btn icon-btn-ghost" data-i18n-en="Settings">Ayarlar</a>
       <a href="cart.html" class="icon-btn">
-        Sepet
+        <span data-i18n-en="Cart">Sepet</span>
         <span class="cart-badge" id="cartBadge">0</span>
       </a>
-      <a href="#" class="logout-link" onclick="logout(); return false;">Çıkış</a>
+      <a href="#" class="logout-link" onclick="logout(); return false;" data-i18n-en="Log Out">Çıkış</a>
     </div>
   </div>
 </header>
@@ -45,20 +46,21 @@
 </main>
 
 <footer class="site-footer">
-  <div class="foot-slogan">everything you don't actually need.</div>
+  <div class="foot-slogan" data-i18n-en="everything you don't actually need.">everything you don't actually need.</div>
   <div class="footer-links">
-    <a href="about.html">Hakkımızda</a>
-    <a href="blog.html">Blog</a>
-    <a href="istatistikler.html">İstatistikler</a>
-    <a href="privacy.html">Gizlilik Politikası</a>
-    <a href="terms.html">Kullanım Koşulları</a>
-    <a href="contact.html">İletişim</a>
+    <a href="about.html" data-i18n-en="About">Hakkımızda</a>
+    <a href="blog.html" data-i18n-en="Blog">Blog</a>
+    <a href="istatistikler.html" data-i18n-en="Stats">İstatistikler</a>
+    <a href="privacy.html" data-i18n-en="Privacy Policy">Gizlilik Politikası</a>
+    <a href="terms.html" data-i18n-en="Terms of Use">Kullanım Koşulları</a>
+    <a href="contact.html" data-i18n-en="Contact">İletişim</a>
   </div>
-  amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.
+  <span data-i18n-en="amazoff — a demo shopping project. No real payments are taken.">amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.</span>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
+<script src="i18n.js"></script>
 <script src="products.js"></script>
 <script src="site-ui.js"></script>
 <script src="cart.js"></script>
@@ -73,8 +75,8 @@
     if (cart.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
-          <p>Sepetiniz boş. Bu aslında sağlıklı bir durum.</p>
-          <a href="home.html" class="icon-btn" style="display:inline-block;margin-top:12px;">Yine de Alışverişe Başla</a>
+          <p>${tt("Sepetiniz boş. Bu aslında sağlıklı bir durum.", "Your cart is empty. This is, frankly, healthy.")}</p>
+          <a href="home.html" class="icon-btn" style="display:inline-block;margin-top:12px;">${tt("Yine de Alışverişe Başla", "Shop Anyway")}</a>
         </div>
       `;
       return;
@@ -90,10 +92,10 @@
       if (!p) return "";
       return `
         <div class="cart-item">
-          <img src="${p.image}" alt="${p.name}">
+          <img src="${p.image}" alt="${productName(p)}">
           <div class="cart-item-info">
-            <div class="name">${p.name}</div>
-            <div class="cat">${p.category}</div>
+            <div class="name">${productName(p)}</div>
+            <div class="cat">${productCategory(p)}</div>
             <div class="price">${formatTL(p.price)}</div>
           </div>
           <div class="qty-small">
@@ -101,7 +103,7 @@
             <span>${item.quantity}</span>
             <button onclick="changeCartQty(${p.id}, 1)">+</button>
           </div>
-          <button class="remove-link" onclick="handleRemove(${p.id})">Kaldır</button>
+          <button class="remove-link" onclick="handleRemove(${p.id})">${tt("Kaldır", "Remove")}</button>
         </div>
       `;
     }).join("");
@@ -109,22 +111,22 @@
     container.innerHTML = `
       <div class="cart-layout">
         <div>
-          <h1 class="section-title">Sepetim</h1>
+          <h1 class="section-title">${tt("Sepetim", "My Cart")}</h1>
           ${itemsHtml}
         </div>
         <div class="summary-box">
-          <h2 style="font-size:16px;font-weight:800;margin:0 0 16px;">Sipariş Özeti</h2>
+          <h2 style="font-size:16px;font-weight:800;margin:0 0 16px;">${tt("Sipariş Özeti", "Order Summary")}</h2>
           <div class="summary-row">
-            <span class="label">Sepet Toplamı</span>
+            <span class="label">${tt("Sepet Toplamı", "Cart Total")}</span>
             <span class="value">${formatTL(total)}</span>
           </div>
           <div class="summary-row">
-            <span class="label">Cüzdan Bakiyesi</span>
+            <span class="label">${tt("Cüzdan Bakiyesi", "Wallet Balance")}</span>
             <span class="value">${formatTL(currentWallet)}</span>
           </div>
           <hr class="summary-divider">
           <div id="checkoutMsg"></div>
-          <button class="btn-full" id="checkoutBtn" onclick="handleCheckout()">Satın Al</button>
+          <button class="btn-full" id="checkoutBtn" onclick="handleCheckout()">${tt("Satın Al", "Check Out")}</button>
         </div>
       </div>
     `;
@@ -149,73 +151,52 @@
     renderCart();
   }
 
+  // Checkout is computed entirely by Supabase: we only ever send
+  // {product_id, quantity} pairs. The database looks up the real price,
+  // checks stock atomically, checks wallet balance, and creates the order
+  // — the browser's opinion of the price is never trusted.
   async function handleCheckout() {
     const msgBox = document.getElementById("checkoutMsg");
     const btn = document.getElementById("checkoutBtn");
     msgBox.innerHTML = "";
 
     const cart = await getCart();
-    const total = cart.reduce((sum, item) => {
-      const p = getProductById(item.productId);
-      return sum + (p ? p.price * item.quantity : 0);
-    }, 0);
 
     if (cart.length === 0) {
-      msgBox.innerHTML = `<div class="msg error">Sepetiniz boş.</div>`;
-      return;
-    }
-    if (total > currentWallet) {
-      msgBox.innerHTML = `<div class="msg error">Yetersiz bakiye. Lütfen sepetinizi güncelleyin.</div>`;
+      msgBox.innerHTML = `<div class="msg error">${tt("Sepetiniz boş.", "Your cart is empty.")}</div>`;
       return;
     }
 
     btn.disabled = true;
-    btn.textContent = "İşleniyor...";
+    btn.textContent = tt("İşleniyor...", "Processing...");
 
-    try {
-      const orderNumber = `ORDER-${Math.floor(1000 + Math.random() * 9000)}`;
+    const items = cart.map((item) => ({ product_id: item.productId, quantity: item.quantity }));
 
-      const { data: order, error: orderErr } = await supabaseClient
-        .from("orders")
-        .insert({ user_id: currentUser.id, order_number: orderNumber, total_amount: total })
-        .select()
-        .single();
-      if (orderErr) throw orderErr;
+    const { data, error } = await supabaseClient.rpc("create_order", { p_items: items });
 
-      const orderItems = cart.map((item) => {
-        const p = getProductById(item.productId);
-        return {
-          order_id: order.id,
-          product_id: p.id,
-          product_name: p.name,
-          quantity: item.quantity,
-          price: p.price,
-        };
-      });
-      const { error: itemsErr } = await supabaseClient.from("order_items").insert(orderItems);
-      if (itemsErr) throw itemsErr;
-
-      const newBalance = currentWallet - total;
-      const { error: walletErr } = await supabaseClient
-        .from("profiles")
-        .update({ wallet_balance: newBalance })
-        .eq("id", currentUser.id);
-      if (walletErr) throw walletErr;
-
-      await clearCart();
-      window.location.href = `success.html?order=${orderNumber}&total=${total}&balance=${newBalance}`;
-    } catch (err) {
-      msgBox.innerHTML = `<div class="msg error">Bir hata oluştu: ${err.message}</div>`;
+    if (error) {
+      const friendly = error.message.includes("Insufficient balance")
+        ? tt("Yetersiz bakiye. Lütfen sepetinizi güncelleyin.", "Insufficient balance. Please update your cart.")
+        : error.message.includes("Insufficient stock")
+        ? tt("Bu üründen yeterli stok kalmadı — biri sizden önce almış olabilir.", "Not enough stock left — someone may have bought it first.")
+        : `${tt("Bir hata oluştu", "Something went wrong")}: ${error.message}`;
+      msgBox.innerHTML = `<div class="msg error">${friendly}</div>`;
       btn.disabled = false;
-      btn.textContent = "Satın Al";
+      btn.textContent = tt("Satın Al", "Check Out");
+      return;
     }
+
+    const result = Array.isArray(data) ? data[0] : data;
+    window.location.href = `success.html?order=${result.order_number}&total=${result.total_amount}&balance=${result.new_balance}`;
   }
 
   (async () => {
     currentUser = await requireAuth();
     if (!currentUser) return;
 
+    await initLangSwitch(currentUser.id);
     currentWallet = await renderWalletBalance(currentUser.id);
+    await loadProducts();
     renderCategoryMenu();
     updateCartBadge();
     renderCart();

@@ -15,34 +15,35 @@
       <span class="logo-slogan">everything you don't actually need</span>
     </a>
     <div class="category-menu-wrap">
-      <button class="category-menu-trigger" onclick="toggleCategoryMenu(event)">Tüm Kategoriler ▾</button>
+      <button class="category-menu-trigger" onclick="toggleCategoryMenu(event)" data-i18n-en="All Categories ▾">Tüm Kategoriler ▾</button>
       <div class="category-menu-panel" id="categoryMenuPanel"></div>
     </div>
     <form class="search-form" onsubmit="return handleSearch(event)">
-      <input type="text" id="searchInput" placeholder="Ürün, kategori ara...">
+      <input type="text" id="searchInput" placeholder="Ürün, kategori ara..." data-i18n-en-placeholder="Search products, categories...">
       <button type="submit">🔍</button>
     </form>
     <nav class="categories">
-      <a href="orders.html">Siparişlerim</a>
-      <a href="feed.html">Tüm Siparişler</a>
-      <a href="istatistikler.html">İstatistikler</a>
-      <a href="blog.html">Blog</a>
+      <a href="orders.html" data-i18n-en="My Orders">Siparişlerim</a>
+      <a href="feed.html" data-i18n-en="All Orders">Tüm Siparişler</a>
+      <a href="istatistikler.html" data-i18n-en="Stats">İstatistikler</a>
+      <a href="blog.html" data-i18n-en="Blog">Blog</a>
     </nav>
     <div class="header-actions">
+      <div class="lang-switch" id="langSwitch"></div>
       <span class="wallet-pill" id="walletDisplay">Cüzdan: -</span>
-      <a href="settings.html" class="icon-btn icon-btn-ghost">Ayarlar</a>
+      <a href="settings.html" class="icon-btn icon-btn-ghost" data-i18n-en="Settings">Ayarlar</a>
       <a href="cart.html" class="icon-btn">
-        Sepet
+        <span data-i18n-en="Cart">Sepet</span>
         <span class="cart-badge" id="cartBadge">0</span>
       </a>
-      <a href="#" class="logout-link" onclick="logout(); return false;">Çıkış</a>
+      <a href="#" class="logout-link" onclick="logout(); return false;" data-i18n-en="Log Out">Çıkış</a>
     </div>
   </div>
 </header>
 
 <main class="container">
-  <h1 class="section-title">Ayarlar</h1>
-  <p class="page-subtitle" style="margin-bottom:22px;">
+  <h1 class="section-title" data-i18n-en="Settings">Ayarlar</h1>
+  <p class="page-subtitle" style="margin-bottom:22px;" data-i18n-en="Your orders are visible to everyone on the &quot;All Orders&quot; page. Here you can choose how your name appears to other users.">
     "Tüm Siparişler" sayfasında siparişleriniz herkese görünür. Burada
     isminizin diğer kullanıcılara nasıl görüneceğini seçebilirsiniz.
   </p>
@@ -51,14 +52,14 @@
     <div id="msgBox"></div>
 
     <div class="form-row">
-      <label>Görünen Ad</label>
-      <input type="text" id="displayName" placeholder="Örn. Ayşe K." maxlength="40">
+      <label data-i18n-en="Display Name">Görünen Ad</label>
+      <input type="text" id="displayName" placeholder="Örn. Ayşe K." maxlength="40" data-i18n-en-placeholder="e.g. Alex K.">
     </div>
 
     <div class="toggle-row">
       <div>
-        <div class="toggle-label">Siparişlerimde adım görünsün</div>
-        <div class="toggle-desc">Kapalıyken "Tüm Siparişler" sayfasında adınız yerine "Anonim Kullanıcı" yazar.</div>
+        <div class="toggle-label" data-i18n-en="Show my name on my orders">Siparişlerimde adım görünsün</div>
+        <div class="toggle-desc" data-i18n-en="When off, the &quot;All Orders&quot; page shows &quot;Anonymous User&quot; instead of your name.">Kapalıyken "Tüm Siparişler" sayfasında adınız yerine "Anonim Kullanıcı" yazar.</div>
       </div>
       <label class="switch">
         <input type="checkbox" id="isPublicToggle">
@@ -66,25 +67,26 @@
       </label>
     </div>
 
-    <button class="btn-full" id="saveBtn" style="margin-top:20px;">Kaydet</button>
+    <button class="btn-full" id="saveBtn" style="margin-top:20px;" data-i18n-en="Save">Kaydet</button>
   </div>
 </main>
 
 <footer class="site-footer">
-  <div class="foot-slogan">everything you don't actually need.</div>
+  <div class="foot-slogan" data-i18n-en="everything you don't actually need.">everything you don't actually need.</div>
   <div class="footer-links">
-    <a href="about.html">Hakkımızda</a>
-    <a href="blog.html">Blog</a>
-    <a href="istatistikler.html">İstatistikler</a>
-    <a href="privacy.html">Gizlilik Politikası</a>
-    <a href="terms.html">Kullanım Koşulları</a>
-    <a href="contact.html">İletişim</a>
+    <a href="about.html" data-i18n-en="About">Hakkımızda</a>
+    <a href="blog.html" data-i18n-en="Blog">Blog</a>
+    <a href="istatistikler.html" data-i18n-en="Stats">İstatistikler</a>
+    <a href="privacy.html" data-i18n-en="Privacy Policy">Gizlilik Politikası</a>
+    <a href="terms.html" data-i18n-en="Terms of Use">Kullanım Koşulları</a>
+    <a href="contact.html" data-i18n-en="Contact">İletişim</a>
   </div>
-  amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.
+  <span data-i18n-en="amazoff — a demo shopping project. No real payments are taken.">amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.</span>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
+<script src="i18n.js"></script>
 <script src="products.js"></script>
 <script src="site-ui.js"></script>
 <script src="cart.js"></script>
@@ -95,7 +97,9 @@
     currentUser = await requireAuth();
     if (!currentUser) return;
 
+    await initLangSwitch(currentUser.id);
     renderWalletBalance(currentUser.id);
+    await loadProducts();
     renderCategoryMenu();
     updateCartBadge();
 
@@ -119,7 +123,7 @@
     const isPublic = document.getElementById("isPublicToggle").checked;
 
     if (isPublic && !displayName) {
-      msgBox.innerHTML = `<div class="msg error">Adınız görünsün istiyorsanız önce bir görünen ad girin.</div>`;
+      msgBox.innerHTML = `<div class="msg error">${tt("Adınız görünsün istiyorsanız önce bir görünen ad girin.", "Enter a display name first if you want your name to be visible.")}</div>`;
       return;
     }
 
@@ -129,9 +133,9 @@
       .eq("id", currentUser.id);
 
     if (error) {
-      msgBox.innerHTML = `<div class="msg error">Kaydedilemedi: ${error.message}</div>`;
+      msgBox.innerHTML = `<div class="msg error">${tt("Kaydedilemedi", "Couldn't save")}: ${error.message}</div>`;
     } else {
-      msgBox.innerHTML = `<div class="msg success">Ayarlarınız kaydedildi.</div>`;
+      msgBox.innerHTML = `<div class="msg success">${tt("Ayarlarınız kaydedildi.", "Your settings were saved.")}</div>`;
     }
   });
 </script>

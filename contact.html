@@ -15,27 +15,28 @@
       <span class="logo-slogan">everything you don't actually need</span>
     </a>
     <div class="category-menu-wrap">
-      <button class="category-menu-trigger" onclick="toggleCategoryMenu(event)">Tüm Kategoriler ▾</button>
+      <button class="category-menu-trigger" onclick="toggleCategoryMenu(event)" data-i18n-en="All Categories ▾">Tüm Kategoriler ▾</button>
       <div class="category-menu-panel" id="categoryMenuPanel"></div>
     </div>
     <form class="search-form" onsubmit="return handleSearch(event)">
-      <input type="text" id="searchInput" placeholder="Ürün, kategori ara...">
+      <input type="text" id="searchInput" placeholder="Ürün, kategori ara..." data-i18n-en-placeholder="Search products, categories...">
       <button type="submit">🔍</button>
     </form>
     <nav class="categories">
-      <a href="orders.html">Siparişlerim</a>
-      <a href="feed.html">Tüm Siparişler</a>
-      <a href="istatistikler.html">İstatistikler</a>
-      <a href="blog.html">Blog</a>
+      <a href="orders.html" data-i18n-en="My Orders">Siparişlerim</a>
+      <a href="feed.html" data-i18n-en="All Orders">Tüm Siparişler</a>
+      <a href="istatistikler.html" data-i18n-en="Stats">İstatistikler</a>
+      <a href="blog.html" data-i18n-en="Blog">Blog</a>
     </nav>
     <div class="header-actions">
+      <div class="lang-switch" id="langSwitch"></div>
       <span class="wallet-pill" id="walletDisplay">Cüzdan: -</span>
-      <a href="settings.html" class="icon-btn icon-btn-ghost">Ayarlar</a>
+      <a href="settings.html" class="icon-btn icon-btn-ghost" data-i18n-en="Settings">Ayarlar</a>
       <a href="cart.html" class="icon-btn">
-        Sepet
+        <span data-i18n-en="Cart">Sepet</span>
         <span class="cart-badge" id="cartBadge">0</span>
       </a>
-      <a href="#" class="logout-link" onclick="logout(); return false;">Çıkış</a>
+      <a href="#" class="logout-link" onclick="logout(); return false;" data-i18n-en="Log Out">Çıkış</a>
     </div>
   </div>
 </header>
@@ -62,20 +63,21 @@
 </main>
 
 <footer class="site-footer">
-  <div class="foot-slogan">everything you don't actually need.</div>
+  <div class="foot-slogan" data-i18n-en="everything you don't actually need.">everything you don't actually need.</div>
   <div class="footer-links">
-    <a href="about.html">Hakkımızda</a>
-    <a href="blog.html">Blog</a>
-    <a href="istatistikler.html">İstatistikler</a>
-    <a href="privacy.html">Gizlilik Politikası</a>
-    <a href="terms.html">Kullanım Koşulları</a>
-    <a href="contact.html">İletişim</a>
+    <a href="about.html" data-i18n-en="About">Hakkımızda</a>
+    <a href="blog.html" data-i18n-en="Blog">Blog</a>
+    <a href="istatistikler.html" data-i18n-en="Stats">İstatistikler</a>
+    <a href="privacy.html" data-i18n-en="Privacy Policy">Gizlilik Politikası</a>
+    <a href="terms.html" data-i18n-en="Terms of Use">Kullanım Koşulları</a>
+    <a href="contact.html" data-i18n-en="Contact">İletişim</a>
   </div>
-  amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.
+  <span data-i18n-en="amazoff — a demo shopping project. No real payments are taken.">amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.</span>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
+<script src="i18n.js"></script>
 <script src="products.js"></script>
 <script src="site-ui.js"></script>
 <script src="cart.js"></script>
@@ -83,7 +85,9 @@
   (async () => {
     const user = await requireAuth();
     if (!user) return;
+    await initLangSwitch(user.id);
     renderWalletBalance(user.id);
+    await loadProducts();
     renderCategoryMenu();
     updateCartBadge();
   })();

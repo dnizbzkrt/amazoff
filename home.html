@@ -15,27 +15,28 @@
       <span class="logo-slogan">everything you don't actually need</span>
     </a>
     <div class="category-menu-wrap">
-      <button class="category-menu-trigger" onclick="toggleCategoryMenu(event)">Tüm Kategoriler ▾</button>
+      <button class="category-menu-trigger" onclick="toggleCategoryMenu(event)" data-i18n-en="All Categories ▾">Tüm Kategoriler ▾</button>
       <div class="category-menu-panel" id="categoryMenuPanel"></div>
     </div>
     <form class="search-form" onsubmit="return handleSearch(event)">
-      <input type="text" id="searchInput" placeholder="Ürün, kategori ara...">
+      <input type="text" id="searchInput" placeholder="Ürün, kategori ara..." data-i18n-en-placeholder="Search products, categories...">
       <button type="submit">🔍</button>
     </form>
     <nav class="categories">
-      <a href="orders.html">Siparişlerim</a>
-      <a href="feed.html">Tüm Siparişler</a>
-      <a href="istatistikler.html">İstatistikler</a>
-      <a href="blog.html">Blog</a>
+      <a href="orders.html" data-i18n-en="My Orders">Siparişlerim</a>
+      <a href="feed.html" data-i18n-en="All Orders">Tüm Siparişler</a>
+      <a href="istatistikler.html" data-i18n-en="Stats">İstatistikler</a>
+      <a href="blog.html" data-i18n-en="Blog">Blog</a>
     </nav>
     <div class="header-actions">
+      <div class="lang-switch" id="langSwitch"></div>
       <span class="wallet-pill" id="walletDisplay">Cüzdan: -</span>
-      <a href="settings.html" class="icon-btn icon-btn-ghost">Ayarlar</a>
+      <a href="settings.html" class="icon-btn icon-btn-ghost" data-i18n-en="Settings">Ayarlar</a>
       <a href="cart.html" class="icon-btn">
-        Sepet
+        <span data-i18n-en="Cart">Sepet</span>
         <span class="cart-badge" id="cartBadge">0</span>
       </a>
-      <a href="#" class="logout-link" onclick="logout(); return false;">Çıkış</a>
+      <a href="#" class="logout-link" onclick="logout(); return false;" data-i18n-en="Log Out">Çıkış</a>
     </div>
   </div>
 </header>
@@ -98,20 +99,21 @@
 </main>
 
 <footer class="site-footer">
-  <div class="foot-slogan">everything you don't actually need.</div>
+  <div class="foot-slogan" data-i18n-en="everything you don't actually need.">everything you don't actually need.</div>
   <div class="footer-links">
-    <a href="about.html">Hakkımızda</a>
-    <a href="blog.html">Blog</a>
-    <a href="istatistikler.html">İstatistikler</a>
-    <a href="privacy.html">Gizlilik Politikası</a>
-    <a href="terms.html">Kullanım Koşulları</a>
-    <a href="contact.html">İletişim</a>
+    <a href="about.html" data-i18n-en="About">Hakkımızda</a>
+    <a href="blog.html" data-i18n-en="Blog">Blog</a>
+    <a href="istatistikler.html" data-i18n-en="Stats">İstatistikler</a>
+    <a href="privacy.html" data-i18n-en="Privacy Policy">Gizlilik Politikası</a>
+    <a href="terms.html" data-i18n-en="Terms of Use">Kullanım Koşulları</a>
+    <a href="contact.html" data-i18n-en="Contact">İletişim</a>
   </div>
-  amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.
+  <span data-i18n-en="amazoff — a demo shopping project. No real payments are taken.">amazoff — demo e-ticaret projesi. Gerçek ödeme alınmaz.</span>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
+<script src="i18n.js"></script>
 <script src="products.js"></script>
 <script src="site-ui.js"></script>
 <script src="cart.js"></script>
@@ -123,31 +125,37 @@
       <div class="product-card">
         <a href="product.html?id=${p.id}">
           <div class="product-img-wrap">
-            <img src="${p.image}" alt="${p.name}" loading="lazy">
-            <span class="category-badge">${p.category}</span>
+            <img src="${p.image}" alt="${productName(p)}" loading="lazy">
+            <span class="category-badge">${productCategory(p)}</span>
           </div>
         </a>
         <div class="product-info">
-          <a href="product.html?id=${p.id}"><p class="product-name">${p.name}</p></a>
+          <a href="product.html?id=${p.id}"><p class="product-name">${productName(p)}</p></a>
           <p class="product-price">${formatTL(p.price)}</p>
           <div class="product-actions">
-            <a href="product.html?id=${p.id}" class="btn-outline">İncele</a>
-            <button class="btn-dark" onclick="addToCart(${p.id}); this.textContent='Eklendi ✓';">Sepete Ekle</button>
+            <a href="product.html?id=${p.id}" class="btn-outline">${tt("İncele", "View")}</a>
+            <button class="btn-dark" onclick="handleQuickAdd(${p.id}, this)">${tt("Sepete Ekle", "Add to Cart")}</button>
           </div>
         </div>
       </div>
     `;
   }
 
+  async function handleQuickAdd(id, btn) {
+    await addToCart(id);
+    btn.textContent = tt("Eklendi ✓", "Added ✓");
+  }
+
   function pickRandomProduct() {
     const p = PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)];
     document.getElementById("rwImage").src = p.image;
-    document.getElementById("rwImage").alt = p.name;
-    document.getElementById("rwName").textContent = `${p.name} — ${formatTL(p.price)}`;
-    document.getElementById("rwDesc").textContent = p.description;
-    document.getElementById("rwYesBtn").onclick = function () {
-      addToCart(p.id);
-      this.textContent = "Sepete Eklendi ✓ (pişman olma vaktin geldi)";
+    document.getElementById("rwImage").alt = productName(p);
+    document.getElementById("rwName").textContent = `${productName(p)} — ${formatTL(p.price)}`;
+    document.getElementById("rwDesc").textContent = productDescription(p);
+    document.getElementById("rwYesBtn").textContent = tt("Evet, sepete at", "Yes, add to cart");
+    document.getElementById("rwYesBtn").onclick = async function () {
+      await addToCart(p.id);
+      this.textContent = tt("Sepete Eklendi ✓ (pişman olma vaktin geldi)", "Added ✓ (time to feel a little regret)");
     };
   }
 
@@ -162,10 +170,10 @@
       if (!p) return "";
       return `
         <a href="product.html?id=${p.id}" class="rail-card">
-          <img src="${p.image}" alt="${p.name}" loading="lazy">
+          <img src="${p.image}" alt="${productName(p)}" loading="lazy">
           <div class="rail-info">
-            <div class="rail-badge">${row.total_quantity} satış</div>
-            <div class="rail-name">${p.name}</div>
+            <div class="rail-badge">${row.total_quantity} ${tt("satış", "sold")}</div>
+            <div class="rail-name">${productName(p)}</div>
             <div class="rail-meta">${formatTL(p.price)}</div>
           </div>
         </a>
@@ -189,7 +197,7 @@
 
     document.getElementById("statToday").textContent = formatTL(todayTotal);
     document.getElementById("statTotal").textContent = formatTL(total);
-    document.getElementById("statOrderCount").textContent = `${orders.length} sipariş`;
+    document.getElementById("statOrderCount").textContent = `${orders.length} ${tt("sipariş", "orders")}`;
     document.getElementById("statGrid").style.display = "grid";
   }
 
@@ -197,8 +205,10 @@
     currentUser = await requireAuth();
     if (!currentUser) return;
 
+    await initLangSwitch(currentUser.id);
     const balance = await renderWalletBalance(currentUser.id);
     document.getElementById("statWallet").textContent = formatTL(balance || 0);
+    await loadProducts();
     renderCategoryMenu();
     updateCartBadge();
     prefillSearchBox();
@@ -208,7 +218,7 @@
     loadPopularProducts();
 
     document.getElementById("categoryTiles").innerHTML = CATEGORIES.map(
-      (c) => `<a class="category-tile" href="home.html?category=${encodeURIComponent(c)}">${c}</a>`
+      (c) => `<a class="category-tile" href="home.html?category=${encodeURIComponent(c.name)}">${tt(c.name, c.name_en)}</a>`
     ).join("");
 
     const params = new URLSearchParams(window.location.search);
@@ -216,22 +226,23 @@
     const search = params.get("search");
 
     let list = PRODUCTS;
-    let title = "Tüm Ürünler";
+    let title = tt("Tüm Ürünler", "All Products");
 
     if (search) {
       list = searchProducts(search);
-      title = `"${search}" için sonuçlar`;
+      title = tt(`"${search}" için sonuçlar`, `Results for "${search}"`);
       document.getElementById("heroSection").style.display = "none";
     } else if (category) {
       list = getProductsByCategory(category);
-      title = category;
+      const catMeta = CATEGORIES.find((c) => c.name === category);
+      title = catMeta ? tt(catMeta.name, catMeta.name_en) : category;
       document.getElementById("heroSection").style.display = "none";
     }
 
     document.getElementById("sectionTitle").textContent = title;
-    document.getElementById("resultsCount").textContent = `${list.length} ürün`;
+    document.getElementById("resultsCount").textContent = `${list.length} ${tt("ürün", "products")}`;
     document.getElementById("productList").innerHTML = list.map(renderProductCard).join("") ||
-      `<p class="page-subtitle">Sonuç bulunamadı. Belki de gerçekten ihtiyacın yoktur.</p>`;
+      `<p class="page-subtitle">${tt("Sonuç bulunamadı. Belki de gerçekten ihtiyacın yoktur.", "No results. Maybe you genuinely don't need this.")}</p>`;
   })();
 </script>
 
